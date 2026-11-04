@@ -1,0 +1,166 @@
+3re - third-party notices
+=========================
+
+3re itself is licensed under the Apache License 2.0 (LICENSE, NOTICE). It
+includes or uses the components below. The licence texts are in the LICENSES
+folder next to this file. Sections:
+
+  1. Statically linked into the 3re programs
+  2. Dynamically linked: Qt 6.8.3
+  3. Separate programs shipped with 3re
+  4. Downloaded on first use (not part of the 3re package)
+  5. Used to build or test 3re, not distributed
+
+1. Statically linked into the 3re programs
+------------------------------------------
+
+Manifold v3.5.4 - robust mesh booleans and triangulation
+  Licence: Apache-2.0                LICENSES/Manifold-Apache-2.0.txt
+  Source:  https://github.com/elalish/manifold
+
+Clipper2 46f639177fe418f9689e8ddb74f08a870c71f5b4 - 2D polygon operations
+  Licence: BSL-1.0                   LICENSES/Clipper2-BSL-1.0.txt
+  Source:  https://github.com/AngusJohnson/Clipper2
+
+nlohmann/json v3.12.0 - JSON reading and writing
+  Licence: MIT                       LICENSES/nlohmann-json-MIT.txt
+  Source:  https://github.com/nlohmann/json
+
+stb_image / stb_image_write 2c980bb59875b0d32144a71867fbdebb2f77cd20 - PNG decode/encode
+  Licence: MIT or public domain      LICENSES/stb-MIT.txt
+  Source:  https://github.com/nothings/stb
+
+miniz 3.1.2 - project containers and update/model archives (ZIP)
+  Licence: MIT                       LICENSES/miniz-MIT.txt
+  Source:  https://github.com/richgel999/miniz
+
+libwebp 1.6.0 - WebP source images (decoder and demux only)
+  Licence: BSD-3-Clause              LICENSES/libwebp-BSD-3-Clause.txt
+  Patents: Google's additional patent grant  LICENSES/libwebp-PATENTS.txt
+  Source:  https://chromium.googlesource.com/webm/libwebp
+
+tinygltf v2.9.7 - independent reload check of exported glTF files
+  Licence: MIT                       LICENSES/tinygltf-MIT.txt
+  Source:  https://github.com/syoyo/tinygltf
+
+xatlas (vendored in third_party/xatlas) - texture atlas packing
+  Licence: MIT                       LICENSES/xatlas-MIT.txt
+  Source:  https://github.com/jpcy/xatlas
+
+meshoptimizer 0.24 (simplifier only) - UV-preserving decimation of foreign GLBs
+  Licence: MIT                       LICENSES/meshoptimizer-MIT.txt
+  Source:  https://github.com/zeux/meshoptimizer
+
+Monocypher 4.0.3 - Ed25519 and BLAKE2b for the signed update manifests
+  Licence: CC0-1.0 or BSD-2-Clause   LICENSES/Monocypher-CC0-or-BSD-2-Clause.txt
+  Source:  https://monocypher.org/ (monocypher-4.0.3.tar.gz, SHA-512 checked)
+
+trellis.cpp (TRELLIS.2 native port) - triangle BVH, QEM simplifier and geometry
+  cleanup used by pixel3d-geometry-audit.exe and pixel3d-trellis-post-safe.exe
+  (tools/trellis/decimate_qem_guarded.cpp is a modified copy of its CPU QEM)
+  Licence: MIT                       LICENSES/Trellis-tri-bvh-MIT.txt
+  Source:  https://github.com/pwilkin/trellis.cpp
+
+GCC 13.1.0 runtime (libstdc++, libgcc) - C++ standard library
+  The command-line programs link it statically; 3re-studio.exe uses
+  libstdc++-6.dll and libgcc_s_seh-1.dll.
+  Licence: GPL-3.0 with the GCC Runtime Library Exception 3.1
+           LICENSES/GPL-3.0.txt, LICENSES/GCC-runtime-library-exception-3.1.txt
+           The exception allows distributing programs compiled with GCC under
+           any licence.
+  Source:  https://gcc.gnu.org/
+
+MinGW-w64 runtime and winpthreads (libwinpthread-1.dll)
+  Licence: see LICENSES/MinGW-w64-runtime.txt, LICENSES/winpthreads.txt (MIT-style)
+  Source:  https://www.mingw-w64.org/
+
+2. Dynamically linked: Qt 6.8.3
+-------------------------------
+
+Qt6Core, Qt6Gui, Qt6Widgets, Qt6OpenGL, Qt6OpenGLWidgets, Qt6Svg, Qt6Network,
+Qt6Concurrent and the Qt plugins in platforms/, styles/, imageformats/,
+iconengines/ and tls/ (Schannel backend for HTTPS update checks and downloads).
+  Licence: LGPL-3.0                  LICENSES/LGPL-3.0.txt (it refers to LICENSES/GPL-3.0.txt)
+  Source:  https://download.qt.io/archive/qt/6.8/6.8.3/single/
+           (qt-everywhere-src-6.8.3), or https://code.qt.io/
+  Qt is used unmodified and linked dynamically: the Qt DLLs beside 3re-studio.exe
+  can be replaced with your own build of the same Qt version.
+  Qt bundles further components inside its libraries (among them zlib, libpng,
+  libjpeg-turbo, FreeType, HarfBuzz, PCRE2, double-conversion, tinycbor and
+  Unicode data). Their names, versions, copyrights and licences are listed in
+  Qt's software bill of materials, shipped as LICENSES/Qt/qtbase-6.8.3.spdx and
+  LICENSES/Qt/qtsvg-6.8.3.spdx.
+
+3. Separate programs shipped with 3re
+-------------------------------------
+
+The 3re TRELLIS.2 engine (app/runtime/trellis-cli.exe, trellis-tex-replay.exe)
+  trellis.cpp at commit 610c90e with 3re's 4 GB patches and the texture-candidates
+  patch (tools/trellis/engine-patch/).
+  Licence: MIT                       LICENSES/Trellis-tri-bvh-MIT.txt
+  Source:  https://github.com/pwilkin/trellis.cpp + tools/trellis/engine-patch/
+
+Khronos glTF-Validator 2.0.0-dev.3.10 - app/gltf_validator.exe, run by 3re-agent.exe (unmodified binary)
+  Licence: Apache-2.0                LICENSES/gltf-validator-Apache-2.0.txt
+  Notices:                           LICENSES/gltf-validator-NOTICES.txt
+  Source:  https://github.com/KhronosGroup/glTF-Validator
+
+ONNX Runtime 1.22.0 (CPU) - app/onnxruntime.dll, runs SAM 2.1 segmentation
+  Official Microsoft release, unmodified, Authenticode-signed.
+  Licence: MIT                       LICENSES/onnxruntime-MIT.txt
+  Notices:                           LICENSES/onnxruntime-ThirdPartyNotices.txt
+  Source:  https://github.com/microsoft/onnxruntime/releases/tag/v1.22.0
+
+Microsoft Visual C++ runtime 14.x (msvcp140.dll, vcruntime140.dll, vcruntime140_1.dll)
+  Needed by onnxruntime.dll and the ggml libraries; deployed app-local as Microsoft
+  allows for its redistributable runtime files.
+  Terms:   https://learn.microsoft.com/cpp/windows/redistributing-visual-cpp-files
+
+QuadWild-BiMDF 0.0.2 (Smart Retopology engine: app/retopo/quadwild.exe, quad_from_patches.exe)
+  Licence: GPL-3.0-or-later          LICENSES/QuadWild-GPL-3.0.txt
+  Source:  Retopology-Sources/ beside 3re.exe (upstream source, pinned dependencies with their own
+           licences inside, 3re's build fixes and patches, BUILD.txt); upstream
+           https://github.com/cgg-bern/quadwild-bimdf (tag v0.0.2).
+  Separate programs started by pixel3d-retopo.exe and communicating through files only;
+  they are not linked into any 3re program.
+
+4. Downloaded on first use (not part of the 3re package)
+---------------------------------------------------------
+
+3re shows each pack's size, source and licence and asks for consent before
+downloading it. app/models.json pins every file by size and SHA-256.
+
+GPU engine libraries - ggml (ggml.dll, ggml-base.dll, ggml-cpu.dll, ggml-cuda.dll)
+  and the NVIDIA CUDA 12 runtime (cudart64_12.dll, cublas64_12.dll, cublasLt64_12.dll)
+  From:    the trellis.cpp v0.8.1 release, trellis-cuda12-windows-x64.zip
+           https://github.com/pwilkin/trellis.cpp/releases/tag/v0.8.1
+  Licence: MIT (trellis.cpp, ggml); the NVIDIA libraries under the NVIDIA CUDA
+           Toolkit End User License Agreement, https://docs.nvidia.com/cuda/eula/index.html
+
+TRELLIS.2 image-to-3D weights, Q4 GGUF (dinov3, ss_flow, ss_dec, shape_flow_512,
+  shape_dec, tex_flow_512, tex_dec)
+  From:    https://huggingface.co/ilintar/trellis2-gguf (revision a57397bd)
+  Licence: TRELLIS.2 by Microsoft: MIT, https://huggingface.co/microsoft/TRELLIS.2-4B
+           dinov3.gguf: Meta's DINOv3 image encoder under the DINOv3 License,
+           https://ai.meta.com/resources/models-and-libraries/dinov3-license
+           Built with DINOv3.
+  Note:    the GGUF repository's own card says "see the source model" and does not
+           state a licence of its own.
+
+SAM 2.1 Hiera-Tiny, ONNX export (encoder, decoder, config)
+  From:    https://huggingface.co/vietanhdev/segment-anything-2.1-onnx-models (revision 6a3ac868)
+  Licence: Apache-2.0 (SAM 2.1 by Meta, https://github.com/facebookresearch/sam2;
+           the ONNX export keeps the upstream licence)
+
+5. Used to build or test 3re, not distributed
+---------------------------------------------
+
+doctest (unit tests), CMake, Ninja and the compiler are used to build 3re but
+are not part of the package.
+
+Godot Engine 4.7 (MIT, https://godotengine.org/license/) - an optional test
+  imports exported GLB files into Godot when a local Godot executable is present.
+  Not shipped.
+
+Pixal3D (MIT, https://github.com/TencentARC/Pixal3D) - evaluated against TRELLIS.2
+  (docs/research and the evaluation report); not shipped and not downloaded.

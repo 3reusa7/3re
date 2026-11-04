@@ -1,0 +1,95 @@
+name: CI
+
+# Every pull request and every push to main: lint, licence and publication scan, secret scan over the whole
+# history, and the Windows build with all tests (no GPU on the runner: the tests do not need one).
+on:
+  pull_request:
+  push:
+    branches: [main, 'oss/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Lint, licence scan, secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Lint (links, JSON, Python, VERSION)
+        run: python3 -I tools/ci/lint.py
+      - name: Licence and publication scan
+        run: python3 -I tools/ci/licence_scan.py
+      - name: PowerShell scripts parse
+        shell: pwsh
+        run: |
+          $bad = 0
+          Get-ChildItem -Recurse -Filter *.ps1 | ForEach-Object {
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$null, [ref]$errors) | Out-Null
+            if ($errors) { $bad++; Write-Host "$($_.FullName): $($errors[0].Message)" }
+          }
+          if ($bad) { exit 1 }
+      - name: Secret scan (gitleaks 8.30.1, whole history, values redacted)
+        run: |
+          curl -sSfL -o gitleaks.tar.gz https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz
+          echo "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  gitleaks.tar.gz" | sha256sum -c -
+          tar -xzf gitleaks.tar.gz gitleaks
+          ./gitleaks git --redact --no-banner --exit-code 1 .
+
+  windows:
+    name: Windows build and tests
+    runs-on: windows-2022
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - name: Qt 6.8.3 with MinGW 13.1 and Ninja
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.3'
+          host: windows
+          target: desktop
+          arch: win64_mingw
+          tools: 'tools_mingw1310 tools_ninja'
+          cache: true
+      - name: Put MinGW 13.1 and Ninja first on PATH
+        shell: pwsh
+        run: |
+          "$env:IQTA_TOOLS\mingw1310_64\bin" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+          "$env:IQTA_TOOLS\Ninja" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+      - name: Cache pinned inputs
+        uses: actions/cache@v4
+        with:
+          path: |
+            .toolchain/onnxruntime
+            .toolchain/models
+            .toolchain/gltf_validator
+          key: inputs-${{ hashFiles('tools/ci/fetch_inputs.ps1', 'tools/fetch_gltf_validator.ps1') }}
+      - name: Pinned inputs (ONNX Runtime 1.22.0, SAM 2.1 tiny, glTF-Validator), SHA-256 checked
+        shell: pwsh
+        run: tools/ci/fetch_inputs.ps1 -OnnxRuntime -Sam -GltfValidator
+      - name: Configure
+        shell: bash
+        run: |
+          gcc --version | head -1
+          cmake -S . -B build/ci -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ \
+            -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR"
+      - name: Build
+        run: cmake --build build/ci -j 4
+      - name: Test
+        # PowerShell, not Git Bash: Git Bash puts its own /mingw64/bin (an older libstdc++) first on PATH.
+        shell: pwsh
+        run: |
+          $cases = @('A_synthetic_chair/front.png', 'D_character/front.png', 'S_segmentation/subject.png',
+            'E_lowpoly_character/cloaked/front.png', 'F_hooded_reference/front.png', 'C_asym_planter/front.png')
+          $env:PIXEL3D_TRELLIS_IMAGE_CASES = ($cases | ForEach-Object { "$PWD/tests/fixtures/$_" }) -join ';'
+          $env:PATH = "$env:IQTA_TOOLS/mingw1310_64/bin;$env:PATH"
+          ctest --test-dir build/ci -j 2 --timeout 1500 --output-on-failure
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

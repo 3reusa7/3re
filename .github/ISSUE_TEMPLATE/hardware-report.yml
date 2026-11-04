@@ -1,0 +1,52 @@
+name: Hardware report
+description: Tell us how 3re runs on your PC (every GPU but the maintainer's is untested).
+labels: ["hardware-report"]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: 3re version
+    validations:
+      required: true
+  - type: input
+    id: gpu
+    attributes:
+      label: GPU and VRAM
+      placeholder: "RTX 4060 8 GB"
+    validations:
+      required: true
+  - type: input
+    id: driver
+    attributes:
+      label: NVIDIA driver version (nvidia-smi) and CUDA version it reports
+  - type: input
+    id: cpu_ram
+    attributes:
+      label: CPU and RAM
+      placeholder: "Ryzen 7 5800H, 16 GB"
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Windows version
+  - type: dropdown
+    id: result
+    attributes:
+      label: Did Image to 3D generate?
+      options: [Yes, "No: refused (memory / GPU check)", "No: error or crash", Did not try]
+    validations:
+      required: true
+  - type: input
+    id: time
+    attributes:
+      label: Time for one generation (minutes) and the result (PASS / REVIEW / FAIL)
+  - type: textarea
+    id: selftest
+    attributes:
+      label: Self-test output (`3re.exe --self-test`)
+      render: text
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes

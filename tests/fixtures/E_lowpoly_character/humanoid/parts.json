@@ -1,0 +1,110 @@
+{
+  "dims": [
+    78,
+    124,
+    22
+  ],
+  "name": "E_lowpoly_character/humanoid",
+  "parts": [
+    {
+      "id": 1000,
+      "key": [
+        255,
+        0,
+        0
+      ],
+      "name": "head",
+      "type": "head"
+    },
+    {
+      "id": 1001,
+      "key": [
+        0,
+        255,
+        0
+      ],
+      "name": "torso",
+      "type": "torso"
+    },
+    {
+      "id": 1002,
+      "key": [
+        0,
+        0,
+        255
+      ],
+      "name": "upper_arm_l",
+      "type": "limb"
+    },
+    {
+      "id": 1003,
+      "key": [
+        255,
+        255,
+        0
+      ],
+      "name": "forearm_l",
+      "type": "limb"
+    },
+    {
+      "id": 1004,
+      "key": [
+        255,
+        0,
+        255
+      ],
+      "name": "upper_arm_r",
+      "type": "limb"
+    },
+    {
+      "id": 1005,
+      "key": [
+        0,
+        255,
+        255
+      ],
+      "name": "forearm_r",
+      "type": "limb"
+    },
+    {
+      "id": 1006,
+      "key": [
+        128,
+        0,
+        0
+      ],
+      "name": "thigh_l",
+      "type": "limb"
+    },
+    {
+      "id": 1007,
+      "key": [
+        0,
+        128,
+        0
+      ],
+      "name": "shin_l",
+      "type": "limb"
+    },
+    {
+      "id": 1008,
+      "key": [
+        0,
+        0,
+        128
+      ],
+      "name": "thigh_r",
+      "type": "limb"
+    },
+    {
+      "id": 1009,
+      "key": [
+        128,
+        128,
+        0
+      ],
+      "name": "shin_r",
+      "type": "limb"
+    }
+  ]
+}

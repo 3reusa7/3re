@@ -1,0 +1,53 @@
+name: Bug report
+description: Something in 3re does not work as described.
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Please do not attach pictures you do not have the rights to share publicly.
+        Security problems: use the Security tab (private report), not an issue.
+  - type: input
+    id: version
+    attributes:
+      label: 3re version
+      description: Settings → About, or the top-right badge (for example 2.9.1-alpha).
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options: [Image to 3D, Pixel Art Builder, Low-Poly Studio, Agent / chat, Retopology, Export, Updates, Model downloads, Installer, Other]
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: "1. Open Image to 3D\n2. Import …\n3. Press Generate"
+    validations:
+      required: true
+  - type: textarea
+    id: selftest
+    attributes:
+      label: Self-test output
+      description: Run `3re.exe --self-test` in the 3re folder and paste the result.
+      render: text
+  - type: textarea
+    id: hardware
+    attributes:
+      label: GPU, VRAM, RAM, Windows version
+      placeholder: "RTX 3050 Laptop 4 GB, driver 581.xx, 16 GB RAM, Windows 11 24H2"
+  - type: textarea
+    id: logs
+    attributes:
+      label: Report files or logs (optional)
+      description: The run's report JSON, crash report path, or log text. Remove personal paths if you prefer.
+      render: text

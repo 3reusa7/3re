@@ -1,0 +1,340 @@
+{
+ "format": "3re-build-inputs",
+ "version": 2,
+ "release_tag": "build-inputs-2",
+ "asset": "3re-build-inputs-2.zip",
+ "size": 41732732,
+ "sha256": "60c7714897dddfd3d4f7ae2fb5734c0087a4048de9d8098c12ce2fa8b47baaf2",
+ "files": [
+  {
+   "path": "engine/trellis-cli.exe",
+   "size": 1786178,
+   "sha256": "4e19aa96208ee56cebdc647aa34c605708c369d5eae553ca71dff3fc1a00e3ba"
+  },
+  {
+   "path": "engine/BUILD.txt",
+   "size": 903,
+   "sha256": "2eb79035527f51d2667b6225fe29f7586954d0086ca61001d056f95d50540577"
+  },
+  {
+   "path": "engine/texture-candidates.patch",
+   "size": 16760,
+   "sha256": "123f029f5dede07d5e983e34efd6d83b05a463ca8a76c8fb23718e11f7ccab7d"
+  },
+  {
+   "path": "engine/pixel3d-trellis-post-safe.exe",
+   "size": 3893391,
+   "sha256": "415020aaf90c6930d3f5e10916813a68381f2e043afd8be82c2cae97b51eb307"
+  },
+  {
+   "path": "engine/libgcc_s_seh-1.dll",
+   "size": 109056,
+   "sha256": "5e27589147caa6d7a30f4cc058a14c455dc62233901ffff9a1797ede425e9f86"
+  },
+  {
+   "path": "engine/libstdc++-6.dll",
+   "size": 2243072,
+   "sha256": "8013488c5528bad7966ca07f3ea2e7a9b743cacb258fe76b46a326f821cc83b0"
+  },
+  {
+   "path": "engine/libwinpthread-1.dll",
+   "size": 53248,
+   "sha256": "c7c7dced65fff71c7bb61f80c771c562f533d26d72722d9d6091129a3b03d5ce"
+  },
+  {
+   "path": "msvc/msvcp140.dll",
+   "size": 643512,
+   "sha256": "7c26614e1d733892c2deac7e245ce115504b1d80592dd0a01b08e3e5a55f89ca"
+  },
+  {
+   "path": "msvc/msvcp140_1.dll",
+   "size": 35768,
+   "sha256": "206c931bf90fdad8816de3b5e2ef80b2bcaa9406c89ecc05fe6fddffe251e982"
+  },
+  {
+   "path": "msvc/vcruntime140.dll",
+   "size": 178616,
+   "sha256": "d1f4225df2cd877dbf130d5668a021dce3f94118455ff5ec952061c30afc9ce7"
+  },
+  {
+   "path": "msvc/vcruntime140_1.dll",
+   "size": 50112,
+   "sha256": "a7146c08f89fe5b04541ab507cdb59ff7b44534d4ba3c668a426c6450a03434e"
+  },
+  {
+   "path": "quadwild/LICENSE-QuadWild-GPL-3.0.txt",
+   "size": 35147,
+   "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903"
+  },
+  {
+   "path": "quadwild/runtime/libgcc_s_seh-1.dll",
+   "size": 109056,
+   "sha256": "5e27589147caa6d7a30f4cc058a14c455dc62233901ffff9a1797ede425e9f86"
+  },
+  {
+   "path": "quadwild/runtime/libstdc++-6.dll",
+   "size": 2243072,
+   "sha256": "8013488c5528bad7966ca07f3ea2e7a9b743cacb258fe76b46a326f821cc83b0"
+  },
+  {
+   "path": "quadwild/runtime/libwinpthread-1.dll",
+   "size": 53248,
+   "sha256": "c7c7dced65fff71c7bb61f80c771c562f533d26d72722d9d6091129a3b03d5ce"
+  },
+  {
+   "path": "quadwild/runtime/quad_from_patches.exe",
+   "size": 3667302,
+   "sha256": "c841478653ebcc5d5098b5f172209fadd07a3c89584d1a73ddefd24992b2c66a"
+  },
+  {
+   "path": "quadwild/runtime/quadwild.exe",
+   "size": 3314726,
+   "sha256": "2a459b242e61e96f8ed3d4aefffb22c55c85ed03e45ee306b9d46fecad9dbd2e"
+  },
+  {
+   "path": "quadwild/runtime/config/main_config/flow.txt",
+   "size": 668,
+   "sha256": "4311542e81ea1ea5fdf1188813f43b35150fa06fc0069eee7c3cfa3d16854306"
+  },
+  {
+   "path": "quadwild/runtime/config/main_config/flow_noalign.txt",
+   "size": 668,
+   "sha256": "de0d599d031ba2fdeec495aa24f7af346545f04f7e28938fe69d6e42b6ede7db"
+  },
+  {
+   "path": "quadwild/runtime/config/main_config/flow_noalign_approx_mst.txt",
+   "size": 671,
+   "sha256": "e02f9685811d451bad2e8e88ecf77ea255703cf6b6301828cefc35fee604e90f"
+  },
+  {
+   "path": "quadwild/runtime/config/main_config/flow_noalign_approx_round2even.txt",
+   "size": 678,
+   "sha256": "fe75ca461306e829984338e5d5625aaf5b2719af0931512806cabb5073b0cb40"
+  },
+  {
+   "path": "quadwild/runtime/config/main_config/flow_noalign_approx_symmdc.txt",
+   "size": 674,
+   "sha256": "4ba7fa6d1faec0134d5e6ccf31f0446f0a345cb8ff168472f9765c9f18edaad1"
+  },
+  {
+   "path": "quadwild/runtime/config/main_config/flow_noalign_edgethru.txt",
+   "size": 669,
+   "sha256": "38020e2fba69f010dffa3880731cc42e4761296b64e79b276157a2e3531c226c"
+  },
+  {
+   "path": "quadwild/runtime/config/main_config/flow_noalign_lemon.txt",
+   "size": 666,
+   "sha256": "b69d6bdd04ea6bbfffd59afafac63f31e724ed34d6db13c12871b72647daead4"
+  },
+  {
+   "path": "quadwild/runtime/config/main_config/flow_noalign_nodethru.txt",
+   "size": 669,
+   "sha256": "f777311633e4357ff2cf08a86e804c7f32486d991c1cbbe48de232b2f60fe2d9"
+  },
+  {
+   "path": "quadwild/runtime/config/main_config/flow_virtual_half.json",
+   "size": 386,
+   "sha256": "0f513afde9359c0cf07ee68113323e364398dedd0d3f3dcbb114c1b474dd4dbd"
+  },
+  {
+   "path": "quadwild/runtime/config/main_config/flow_virtual_half.txt",
+   "size": 666,
+   "sha256": "de94fcdf0e9f8f502fb3952c8bc3ed3e0f19602002cfd08dc942f6f6e5913222"
+  },
+  {
+   "path": "quadwild/runtime/config/main_config/flow_virtual_simple.json",
+   "size": 316,
+   "sha256": "53e6182fdaaf9646cb4f24a8f3b2396f4f765bbb841300388d9ee7866a29ebd1"
+  },
+  {
+   "path": "quadwild/runtime/config/main_config/ilp.txt",
+   "size": 552,
+   "sha256": "2bd6083c73aa078429e62390fbc120850f0c6ca246d4b161a368d958e418f016"
+  },
+  {
+   "path": "quadwild/runtime/config/main_config/ilp_noalign.txt",
+   "size": 552,
+   "sha256": "fffe007c3181121a2b65ea98a846388e38cafb25d0e73950fad86f66969d2065"
+  },
+  {
+   "path": "quadwild/runtime/config/main_config/ilp_noalign_fullfullsolve24h-64g.txt",
+   "size": 470,
+   "sha256": "2b75db611515870cd744112d1923f3dbd18e4a0b63b40dfd271b1abae70e0632"
+  },
+  {
+   "path": "quadwild/runtime/config/prep_config/basic_setup.txt",
+   "size": 56,
+   "sha256": "2992b386212421fbc5dfd00a5ecff352db74053c90b2892c457876b7eea3928f"
+  },
+  {
+   "path": "quadwild/runtime/config/prep_config/basic_setup_Mechanical.txt",
+   "size": 56,
+   "sha256": "2992b386212421fbc5dfd00a5ecff352db74053c90b2892c457876b7eea3928f"
+  },
+  {
+   "path": "quadwild/runtime/config/prep_config/basic_setup_Organic.txt",
+   "size": 56,
+   "sha256": "f268d2f663ad1f8100dd65bcac0b64643306091a28a8b017341fb9fb9bda92da"
+  },
+  {
+   "path": "quadwild/runtime/config/satsuma/approx-mst.json",
+   "size": 379,
+   "sha256": "c236595008556be928552197671a4ab17bfe986089ce6387beaa921da834f1b7"
+  },
+  {
+   "path": "quadwild/runtime/config/satsuma/approx-round2even.json",
+   "size": 387,
+   "sha256": "01efac259d4a338899de1eb3ed7c68dad689c6bd00438413c6ffaafe6608c2fb"
+  },
+  {
+   "path": "quadwild/runtime/config/satsuma/approx-symmdc.json",
+   "size": 378,
+   "sha256": "c9549d2ed2d0ccbccf98e683acb9936793b12ecafb24f42520b04fd3c6b86eb3"
+  },
+  {
+   "path": "quadwild/runtime/config/satsuma/debug.json",
+   "size": 378,
+   "sha256": "212ff755117f3412d30283059c98318627491274f7a3bffa48ce555bedb0bf02"
+  },
+  {
+   "path": "quadwild/runtime/config/satsuma/default.json",
+   "size": 378,
+   "sha256": "4af082e4634a0be81a658aa0b95d537aba28b81cb43891fce60934d771285e13"
+  },
+  {
+   "path": "quadwild/runtime/config/satsuma/edgethru.json",
+   "size": 371,
+   "sha256": "47633cb87e2e8e380c1a2d120d43a08115fbaf7b228d15d6e2178b9c7bca55a7"
+  },
+  {
+   "path": "quadwild/runtime/config/satsuma/lemon.json",
+   "size": 378,
+   "sha256": "4af082e4634a0be81a658aa0b95d537aba28b81cb43891fce60934d771285e13"
+  },
+  {
+   "path": "quadwild/runtime/config/satsuma/nodethru.json",
+   "size": 378,
+   "sha256": "4af082e4634a0be81a658aa0b95d537aba28b81cb43891fce60934d771285e13"
+  },
+  {
+   "path": "quadwild/sources/BUILD.txt",
+   "size": 2030,
+   "sha256": "b59cf446dd7fcd62842014bf3979e94760b7d69688892149675b5b60397a1519"
+  },
+  {
+   "path": "quadwild/sources/dependency-sources.json",
+   "size": 4888,
+   "sha256": "0fa334a69d32cb62e14b72e5083b02cb309ac93b2db484ab3c9206371996f7be"
+  },
+  {
+   "path": "quadwild/sources/local-build-fixes.patch",
+   "size": 7398,
+   "sha256": "2d389484af3b94c30b6e930654229ceb6f7cc5b552ed3f65fe720c60756c86f8"
+  },
+  {
+   "path": "quadwild/sources/nested-comiso.json",
+   "size": 329,
+   "sha256": "d5570663ca9e187f5438f070a5763b3ccb3706b944668f7967fb03fefdab1eb4"
+  },
+  {
+   "path": "quadwild/sources/nested-openmesh.json",
+   "size": 156,
+   "sha256": "98e7792342fcc4cbe6248adb97f998283d89a8e2b10eb3e5dbf25200bc02cca0"
+  },
+  {
+   "path": "quadwild/sources/prepare_quadwild_build.py",
+   "size": 7261,
+   "sha256": "d526793a2fde5c3d35a3a3ad523c2146143fa51fc33b1ee99c3413fe6125f01a"
+  },
+  {
+   "path": "quadwild/sources/rebuild-qw_prepare.py",
+   "size": 1660,
+   "sha256": "24c827776043bb81d83c576884e97771999fdd1564f6f9b37ead8de3e6faffc9"
+  },
+  {
+   "path": "quadwild/sources/rebuild-qw_v4.py",
+   "size": 2657,
+   "sha256": "353a33aa619a9d695033c82fee5d7eef456d09537bcc0e67da6783f2f5e87aee"
+  },
+  {
+   "path": "quadwild/sources/source.zip",
+   "size": 8524845,
+   "sha256": "024689c8bf96aa6ec905977eac065b6ee2d5dbd56a50f2e9f9e1564c21cd8ce3"
+  },
+  {
+   "path": "quadwild/sources/v4-patches.zip",
+   "size": 43954,
+   "sha256": "9de684f1b603109e0b4a58857b4f0065938be61ea4ad15983793b7b1a13cfc72"
+  },
+  {
+   "path": "quadwild/sources/archives/Base-172ab59f51acc45b7f235c3421d2ab165c4e8b35.tar.gz",
+   "size": 83226,
+   "sha256": "fd1ca30cf8a3a1692534cc517e21a85d9195a03dfec7da9c4978ca0fc0626474"
+  },
+  {
+   "path": "quadwild/sources/archives/CoMISo-ae44c22b8a6d049e3e3f04a16eaa7eeafcf39d9e.tar.gz",
+   "size": 476213,
+   "sha256": "4340946ef07a177ff09097c04b1359c6f4b43007e52b998fb34968c0c63123b2"
+  },
+  {
+   "path": "quadwild/sources/archives/OpenMesh-b1d3278cd7578d02e44c008beaa8ce28fc24c6a7.tar.gz",
+   "size": 6544830,
+   "sha256": "293ac9a9228b0cce17151193de3b4395bd3b06b592c43b0fdaa4c057ffcd2f7e"
+  },
+  {
+   "path": "quadwild/sources/archives/cmake-library-12377901769280afe687eb3e98e0a02850fabc52.tar.gz",
+   "size": 15487,
+   "sha256": "b16474b7ba83b92cb91f7e10b212a1b348b6d36b0905de91977f385b0e877d8f"
+  },
+  {
+   "path": "quadwild/sources/archives/cmake-library-9e180cdb4df1d8370ccd9aeee1499709441dbdd1.tar.gz",
+   "size": 15501,
+   "sha256": "cd75a1d87b2ba74c151f4d297934cc6b52f3819334733faa98cb90f504f757a8"
+  },
+  {
+   "path": "quadwild/sources/archives/eigen-e7248b26a1ed53fa030c5c459f7ea095dfd276ac.tar.gz",
+   "size": 2711296,
+   "sha256": "f9dd558b4e0c4b8cafdec90b902c1722d40cf6230a77d53c947af1cfa27d1afa"
+  },
+  {
+   "path": "quadwild/sources/archives/gmm-fetched-by-quadwild-build.tar.gz",
+   "size": 541196,
+   "sha256": "03075886ee447c66a578269ad4bf05be74813c18f6c6b3833277b56c95c6e7e4"
+  },
+  {
+   "path": "quadwild/sources/archives/json-bc889afb4c5bf1c0d8ee29ef35eaaf4c8bef8a5d.tar.gz",
+   "size": 8100345,
+   "sha256": "a064b06ae82cdf425e67f1b9aa34f2ba8cda2559ab0d54ac08d36a8ecd4b8000"
+  },
+  {
+   "path": "quadwild/sources/archives/lemon-129cee881431d777cc3058b93c59ef01dd3909ee.tar.gz",
+   "size": 655674,
+   "sha256": "960de8dc9ca0256c5b4090fdfc1587c99e3826a0cfa2c53f1c1a36132a9d1101"
+  },
+  {
+   "path": "quadwild/sources/archives/libTimekeeper-4f4b180e84c5fb4cdbf9c98ec2d260a75d8eeda2.tar.gz",
+   "size": 7554,
+   "sha256": "b01f40cb68a182428f68239284e78ddfdb69ab147ab3e23b8f02a40dd1f8cbf2"
+  },
+  {
+   "path": "quadwild/sources/archives/libigl-f68e055b7dfb281489aa4b921fba65686ff4d456.tar.gz",
+   "size": 1135490,
+   "sha256": "8b77e01019c9465821074088e4e09653bfdbaca3cbc44cf63fe8fa47e1bcc925"
+  },
+  {
+   "path": "quadwild/sources/archives/libsatsuma-8992b8d717456cc66f06f5f9b14952f97389e761.tar.gz",
+   "size": 38266,
+   "sha256": "7d9b81225610fed4b868e991f309bd7407d4cf0efdc5fcdb283f8f819090870e"
+  },
+  {
+   "path": "quadwild/sources/archives/vcglib-8fd06e57cf10632ddcb84ad6aee65bcca55e0560.tar.gz",
+   "size": 7170440,
+   "sha256": "43816e5507f66c7b8256a6bf7be220d25e37d5c710826e2a3016a7250b950296"
+  },
+  {
+   "path": "quadwild/sources/archives/xfield_tracer_fork-d7b5646283b740445feaa42a8f31bd64ec423b49.tar.gz",
+   "size": 128667,
+   "sha256": "57a1970aa6ca2b02182f16311980ddf924d4f8577804f4b6e289e86bd4f1df97"
+  }
+ ]
+}

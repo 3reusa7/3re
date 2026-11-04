@@ -1,0 +1,16 @@
+3re
+Copyright 2026 The 3re authors
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+It includes third-party software under their own licences, listed with their
+sources in THIRD-PARTY-NOTICES.txt; the licence texts are in the LICENSES
+folder.
+
+The AI models and GPU engine libraries are not part of this product. 3re
+downloads them on first use, after showing their size, source and licence
+and asking for consent (app/models.json lists each file and its SHA-256).
+
+Built with DINOv3: the TRELLIS.2 weights that 3re downloads include Meta's
+DINOv3 image encoder, used under the DINOv3 License
+(https://ai.meta.com/resources/models-and-libraries/dinov3-license).

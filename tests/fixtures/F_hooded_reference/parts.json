@@ -1,0 +1,160 @@
+{
+  "dims": [
+    32,
+    107,
+    23
+  ],
+  "name": "F_hooded_reference",
+  "parts": [
+    {
+      "id": 1000,
+      "key": [
+        255,
+        0,
+        0
+      ],
+      "name": "head",
+      "type": "head"
+    },
+    {
+      "id": 1001,
+      "key": [
+        128,
+        0,
+        0
+      ],
+      "name": "hair",
+      "type": "accessory"
+    },
+    {
+      "id": 1002,
+      "key": [
+        0,
+        0,
+        128
+      ],
+      "name": "hood",
+      "type": "cloth"
+    },
+    {
+      "id": 1003,
+      "key": [
+        0,
+        128,
+        255
+      ],
+      "name": "scarf",
+      "type": "cloth"
+    },
+    {
+      "id": 1004,
+      "key": [
+        255,
+        128,
+        0
+      ],
+      "name": "hand_l",
+      "type": "limb"
+    },
+    {
+      "id": 1005,
+      "key": [
+        128,
+        255,
+        0
+      ],
+      "name": "hand_r",
+      "type": "limb"
+    },
+    {
+      "id": 1006,
+      "key": [
+        128,
+        128,
+        128
+      ],
+      "name": "belt",
+      "type": "accessory"
+    },
+    {
+      "id": 1007,
+      "key": [
+        255,
+        255,
+        128
+      ],
+      "name": "pouch",
+      "type": "accessory"
+    },
+    {
+      "id": 1008,
+      "key": [
+        0,
+        255,
+        0
+      ],
+      "name": "torso",
+      "type": "torso"
+    },
+    {
+      "id": 1009,
+      "key": [
+        0,
+        0,
+        255
+      ],
+      "name": "arm_l",
+      "type": "limb"
+    },
+    {
+      "id": 1010,
+      "key": [
+        255,
+        0,
+        255
+      ],
+      "name": "arm_r",
+      "type": "limb"
+    },
+    {
+      "id": 1011,
+      "key": [
+        0,
+        255,
+        255
+      ],
+      "name": "leg_l",
+      "type": "limb"
+    },
+    {
+      "id": 1012,
+      "key": [
+        255,
+        255,
+        0
+      ],
+      "name": "leg_r",
+      "type": "limb"
+    },
+    {
+      "id": 1013,
+      "key": [
+        128,
+        0,
+        255
+      ],
+      "name": "boot_l",
+      "type": "limb"
+    },
+    {
+      "id": 1014,
+      "key": [
+        0,
+        128,
+        0
+      ],
+      "name": "boot_r",
+      "type": "limb"
+    }
+  ]
+}

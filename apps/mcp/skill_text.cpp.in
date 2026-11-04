@@ -1,0 +1,11 @@
+// Generated from skills/pixel3d-reconstruct/SKILL.md at configure time; do not edit.
+#include "mcp/catalog.hpp"
+
+namespace pixel3d::mcp {
+
+std::string_view skill_markdown() {
+  static constexpr std::string_view kText = R"P3DSKILL(@PIXEL3D_SKILL_MD@)P3DSKILL";
+  return kText;
+}
+
+}  // namespace pixel3d::mcp

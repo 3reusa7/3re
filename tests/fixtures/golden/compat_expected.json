@@ -1,0 +1,14 @@
+{
+  "generator": "Pixel3D 1.0.0",
+  "projects": {
+    "project_v1.p3d": {
+      "glb": "0b884414c5eadeffa14441e027a51d0c3d67d8ea26c2a34e4141be2340da4b2e"
+    },
+    "project_v2_edits.p3d": {
+      "glb": "270fcdae43bb66dd4697482cea18ab8cd9e5511883132534219bfc0093683009"
+    },
+    "project_v2_single.p3d": {
+      "glb": "f0a1b851b5bb014a32a8fb76ca86133d3bb6b23b863dd68ecc221fe8d7cb6fad"
+    }
+  }
+}

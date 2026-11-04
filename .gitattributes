@@ -1,0 +1,10 @@
+* text=auto eol=lf
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+*.png binary
+*.glb binary
+*.p3d binary
+*.7z binary
+# Signed test vectors: byte-exact
+tests/update/fixtures/signed.txt -text
+tests/update/fixtures/*.minisig -text

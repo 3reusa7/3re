@@ -1,0 +1,25 @@
+name: Feature request
+description: An idea for 3re.
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do?
+      description: The problem first, then (optionally) your idea of a solution.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Your idea
+  - type: dropdown
+    id: model
+    attributes:
+      label: Does it change how an AI model is used?
+      description: Model or method changes need a short written study first (CONTRIBUTING.md).
+      options: ["No", "Yes", "Not sure"]
+  - type: textarea
+    id: context
+    attributes:
+      label: Anything else (engine you export to, hardware, examples you have the rights to share)

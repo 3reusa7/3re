@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and ideas
+    url: https://github.com/3reusa7/3re/discussions
+    about: Ask and discuss in GitHub Discussions (English or Arabic).
+  - name: Security problem
+    url: https://github.com/3reusa7/3re/security/advisories/new
+    about: Report vulnerabilities privately, not as an issue.

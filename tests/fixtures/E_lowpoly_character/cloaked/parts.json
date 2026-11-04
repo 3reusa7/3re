@@ -1,0 +1,70 @@
+{
+  "dims": [
+    50,
+    126,
+    34
+  ],
+  "name": "E_lowpoly_character/cloaked",
+  "parts": [
+    {
+      "id": 1000,
+      "key": [
+        255,
+        0,
+        0
+      ],
+      "name": "head",
+      "type": "head"
+    },
+    {
+      "id": 1001,
+      "key": [
+        0,
+        255,
+        0
+      ],
+      "name": "body",
+      "type": "cloth"
+    },
+    {
+      "id": 1002,
+      "key": [
+        0,
+        0,
+        255
+      ],
+      "name": "horn_l",
+      "type": "accessory"
+    },
+    {
+      "id": 1003,
+      "key": [
+        255,
+        255,
+        0
+      ],
+      "name": "horn_r",
+      "type": "accessory"
+    },
+    {
+      "id": 1004,
+      "key": [
+        255,
+        0,
+        255
+      ],
+      "name": "leg_l",
+      "type": "limb"
+    },
+    {
+      "id": 1005,
+      "key": [
+        0,
+        255,
+        255
+      ],
+      "name": "leg_r",
+      "type": "limb"
+    }
+  ]
+}

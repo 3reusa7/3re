@@ -1,0 +1,8 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+  <qresource prefix="/">
+    <file>3re.png</file>
+    <file>3re-512.png</file>
+    <file>3re-mark.png</file>
+  </qresource>
+</RCC>

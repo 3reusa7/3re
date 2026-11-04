@@ -1,0 +1,22 @@
+# dev toolchain (fetched by tools/bootstrap_toolchain.ps1)
+/.toolchain/
+# build outputs
+/build/
+/out/
+/dist/
+*.p3d.autosave
+# editor
+.vs/
+.vscode/
+*.user
+/.superpowers/
+aqtinstall.log
+# your own test drawings (read in place, never committed)
+/samples/
+/build_*.log
+
+# Python bytecode
+__pycache__/
+*.pyc
+/build*.log
+/ctest*.log

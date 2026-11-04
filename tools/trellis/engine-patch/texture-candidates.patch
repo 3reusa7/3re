@@ -1,0 +1,246 @@
+diff --git a/include/trellis_args.h b/include/trellis_args.h
+index b990fc8..85dafec 100644
+--- a/include/trellis_args.h
++++ b/include/trellis_args.h
+@@ -102,6 +102,12 @@ struct TrellisParams {
+                                 // pipelines (binary: i32 V,F,Mv,res; f32 verts[V*3];
+                                 // i32 faces[F*3]; i32 coords[Mv*3]; f32 pbr6[Mv*6];
+                                 // same layout as the TRELLIS_DUMP_POST debug env)
++    // 3re texture candidates (fork of 7a80638a): --tex-replay runs ONLY the texture flow + PBR decode
++    // from a texture session written by a normal run (env TRELLIS_TEX_SESSION) and copies the mesh and
++    // voxel coordinates byte-for-byte from --post-from (that run's dump) into --dump-post.
++    std::string tex_replay;     // texture session file
++    std::string tex_post_from;  // the same run's POST dump (mesh + coords source)
++    int  tex_steps = 0;         // texture flow sampler steps; 0 = same as --steps
+     bool bg_only = false;       // background removal only: write the cutout and skip the rest
+ 
+     int  steps    = 0;          // flow sampler steps; 0 = model default (12). Lowering this
+diff --git a/src/trellis_args.cpp b/src/trellis_args.cpp
+index 8c707fd..193eaa3 100644
+--- a/src/trellis_args.cpp
++++ b/src/trellis_args.cpp
+@@ -144,6 +144,10 @@ void print_usage(const char* argv0, bool server) {
+         "      --capture-stages DIR  save SS/SLAT/decoder arrays; new/empty DIR, 1 GiB cap,\n"
+         "                          1 GiB disk reserve; TRELLIS 512 geometry only\n"
+         "      --dump-bg           also write the background-removal cutout as <out>_cutout.png\n"
++        "      --tex-replay SESSION  texture flow + PBR decode only, from a texture session (env\n"
++        "                          TRELLIS_TEX_SESSION of an earlier run); needs --post-from and --dump-post\n"
++        "      --post-from PATH    that run's POST dump: its mesh and voxel coords are copied unchanged\n"
++        "      --tex-steps N       texture flow sampler steps (default: --steps)\n"
+         "      --dump-post PATH    write the raw decoded mesh + sparse PBR volume to PATH and\n"
+         "                          exit (skips remesh/decimate/UV/bake/GLB) -- for external\n"
+         "                          post-processing pipelines\n"
+@@ -231,6 +235,9 @@ bool parse_args(int argc, char** argv, TrellisParams& p) {
+         else if (a == "--no-texture")           { p.texture = false; }
+         else if (a == "--xatlas")               { p.xatlas = true; }
+         else if (a == "--box-uv")               { p.xatlas = false; }
++        else if (a == "--tex-replay")           { const char* v = need(a.c_str()); if (!v) return false; p.tex_replay = v; }
++        else if (a == "--post-from")            { const char* v = need(a.c_str()); if (!v) return false; p.tex_post_from = v; }
++        else if (a == "--tex-steps")            { const char* v = need(a.c_str()); if (!v) return false; p.tex_steps = atoi(v); }
+         else if (a == "--dump-post")            { const char* v = need(a.c_str()); if (!v) return false; p.dump_post = v; }
+         else if (a == "--band")                 { const char* v = need(a.c_str()); if (!v) return false; p.band = atoi(v); }
+         else if (a == "--decim")                { const char* v = need(a.c_str()); if (!v) return false; p.decim = atoi(v); }
+diff --git a/src/trellis_cli.cpp b/src/trellis_cli.cpp
+index 6b3210d..1719ae7 100644
+--- a/src/trellis_cli.cpp
++++ b/src/trellis_cli.cpp
+@@ -27,6 +27,8 @@
+ #include <cstdlib>
+ #include <cstdint>
+ #include <random>
++#include <sstream>
++#include <cstring>
+ #include <vector>
+ #include <string>
+ #include <chrono>
+@@ -70,6 +72,153 @@ static const float SHAPE_STD[32]={5.972266f,4.706852f,5.445010f,5.209927f,5.3202
+ static const float TEX_MEAN[32]={3.501659f,2.212398f,2.226094f,0.251093f,-0.026248f,-0.687364f,0.439898f,-0.928075f,0.029398f,-0.339596f,-0.869527f,1.038479f,-0.972385f,0.126042f,-1.129303f,0.455149f,-1.209521f,2.069067f,0.544735f,2.569128f,-0.323407f,2.293000f,-1.925608f,-1.217717f,1.213905f,0.971588f,-0.023631f,0.106750f,2.021786f,0.250524f,-0.662387f,-0.768862f};
+ static const float TEX_STD[32]={2.665652f,2.743913f,2.765121f,2.595319f,3.037293f,2.291316f,2.144656f,2.911822f,2.969419f,2.501689f,2.154811f,3.163343f,2.621215f,2.381943f,3.186697f,3.021588f,2.295916f,3.234985f,3.233086f,2.260140f,2.874801f,2.810596f,3.292720f,2.674999f,2.680878f,2.372054f,2.451546f,2.353556f,2.995195f,2.379849f,2.786195f,2.775190f};
+ 
++// ---- 3re texture candidates (fork of 7a80638a) ------------------------------------------------
++// A texture session holds exactly what the TRELLIS.2 res-512 texture flow and decoder read: the
++// shape SLAT (coords + normalized feats), the DINOv3 conditioning, the shape decoder's subdivision
++// masks, the decoded voxel coords, and the sampler's RNG state when the texture stage began (so a
++// replay with that state must reproduce the run's own PBR volume bit for bit).
++namespace texsession {
++constexpr char MAGIC[8] = {'P','3','D','T','E','X','S','1'};
++struct Session {
++    std::vector<std::array<int,3>> shc, coords;
++    std::vector<float> slat_norm, cond;
++    std::vector<std::vector<uint8_t>> subs;
++    int Lc = 0, res = 0;
++    std::string rng_state;
++};
++static bool wr(FILE* f, const void* p, size_t n) { return n == 0 || fwrite(p, 1, n, f) == n; }
++static bool rd(FILE* f, void* p, size_t n) { return n == 0 || fread(p, 1, n, f) == n; }
++static bool write(const char* path, const Session& s) {
++    FILE* f = fopen(path, "wb");
++    if (!f) return false;
++    const uint32_t hdr[7] = {1u, (uint32_t)s.shc.size(), (uint32_t)s.Lc, 1024u, (uint32_t)s.coords.size(),
++                             (uint32_t)s.res, (uint32_t)s.subs.size()};
++    const uint32_t rl = (uint32_t)s.rng_state.size();
++    bool ok = wr(f, MAGIC, 8) && wr(f, hdr, sizeof hdr) && wr(f, &rl, 4) && wr(f, s.rng_state.data(), rl) &&
++              wr(f, s.shc.data(), s.shc.size() * 12) && wr(f, s.slat_norm.data(), s.slat_norm.size() * 4) &&
++              wr(f, s.cond.data(), s.cond.size() * 4);
++    for (const auto& m : s.subs) {
++        const uint64_t n = m.size();
++        ok = ok && wr(f, &n, 8) && wr(f, m.data(), m.size());
++    }
++    ok = ok && wr(f, s.coords.data(), s.coords.size() * 12);
++    return fclose(f) == 0 && ok;
++}
++static bool read(const char* path, Session& s, std::string& err) {
++    std::error_code ec;
++    const uint64_t file_size = std::filesystem::file_size(path, ec);
++    if (ec) { err = "cannot open texture session"; return false; }
++    FILE* f = fopen(path, "rb");
++    if (!f) { err = "cannot open texture session"; return false; }
++    char magic[8]; uint32_t hdr[7] = {}, rl = 0;
++    bool ok = rd(f, magic, 8) && memcmp(magic, MAGIC, 8) == 0 && rd(f, hdr, sizeof hdr) && hdr[0] == 1u && hdr[3] == 1024u &&
++              hdr[1] > 0 && hdr[1] < (1u << 22) && hdr[2] > 0 && hdr[2] <= 16384 && hdr[4] > 0 && hdr[4] < (1u << 26) &&
++              hdr[6] <= 8 && rd(f, &rl, 4) && rl < 65536;
++    // Everything the header promises must fit in the file before anything is allocated.
++    ok = ok && 8 + 28 + 4 + uint64_t(rl) + uint64_t(hdr[1]) * (12 + 128) + uint64_t(hdr[2]) * 4096 + uint64_t(hdr[4]) * 12 <= file_size;
++    if (!ok) { fclose(f); err = "not a texture session (magic/version/bounds)"; return false; }
++    s.rng_state.resize(rl); s.shc.resize(hdr[1]); s.slat_norm.resize((size_t)hdr[1] * 32);
++    s.Lc = (int)hdr[2]; s.cond.resize((size_t)hdr[2] * 1024); s.res = (int)hdr[5]; s.subs.resize(hdr[6]);
++    ok = rd(f, s.rng_state.data(), rl) && rd(f, s.shc.data(), s.shc.size() * 12) &&
++         rd(f, s.slat_norm.data(), s.slat_norm.size() * 4) && rd(f, s.cond.data(), s.cond.size() * 4);
++    for (auto& m : s.subs) {
++        uint64_t n = 0;
++        ok = ok && rd(f, &n, 8) && n <= file_size;
++        if (!ok) break;
++        m.resize((size_t)n);
++        ok = rd(f, m.data(), m.size());
++    }
++    s.coords.resize(hdr[4]);
++    ok = ok && rd(f, s.coords.data(), s.coords.size() * 12);
++    char extra;
++    ok = ok && fread(&extra, 1, 1, f) == 0;  // nothing after the coords
++    fclose(f);
++    if (!ok) err = "texture session truncated or malformed";
++    return ok;
++}
++}  // namespace texsession
++
++// --tex-replay: the res-512 TRELLIS.2 texture stage alone (the decode_texture(false) path of
++// trellis_run for a non-cascade, non-Pixal3D run), then the run's own POST dump with only the PBR
++// block replaced. The flags (low-VRAM caps, FA precision, scheduler) are the ones trellis_run set.
++static int tex_replay_run(const trellis::TrellisParams& cfg, bool F32, double t0) {
++    if (cfg.tex_post_from.empty() || cfg.dump_post.empty() || cfg.family != trellis::ModelFamily::Trellis || cfg.cascade) {
++        fprintf(stderr, "[tex-replay] needs --post-from and --dump-post, TRELLIS --res 512\n");
++        return 1;
++    }
++    texsession::Session s;
++    std::string err;
++    if (!texsession::read(cfg.tex_replay.c_str(), s, err)) { fprintf(stderr, "[tex-replay] %s\n", err.c_str()); return 1; }
++    // The run's POST dump: header, mesh, coords must match the session's voxels exactly.
++    FILE* pf = fopen(cfg.tex_post_from.c_str(), "rb");
++    if (!pf) { fprintf(stderr, "[tex-replay] cannot open %s\n", cfg.tex_post_from.c_str()); return 1; }
++    int32_t ph[4] = {};
++    std::error_code pec;
++    const uint64_t post_size = std::filesystem::file_size(cfg.tex_post_from, pec);
++    if (fread(ph, 4, 4, pf) != 4 || ph[0] <= 0 || ph[1] <= 0 || ph[2] != (int32_t)s.coords.size() || ph[3] != s.res || pec ||
++        16 + uint64_t(ph[0]) * 12 + uint64_t(ph[1]) * 12 + uint64_t(ph[2]) * 36 != post_size) {
++        fclose(pf); fprintf(stderr, "[tex-replay] POST dump does not belong to this session (header)\n"); return 1;
++    }
++    std::vector<unsigned char> mesh_bytes((size_t)ph[0] * 12 + (size_t)ph[1] * 12);
++    std::vector<std::array<int,3>> pc((size_t)ph[2]);
++    bool ok = fread(mesh_bytes.data(), 1, mesh_bytes.size(), pf) == mesh_bytes.size() &&
++              fread(pc.data(), 12, pc.size(), pf) == pc.size();
++    fclose(pf);
++    if (!ok || memcmp(pc.data(), s.coords.data(), pc.size() * 12) != 0) {
++        fprintf(stderr, "[tex-replay] POST dump voxel coords differ from the session's\n"); return 1;
++    }
++    std::mt19937 rng; std::normal_distribution<float> randn(0.f, 1.f);
++    const bool exact = cfg.seed == 0;  // --seed 0: the run's own RNG state (reproduction check)
++    if (exact) { std::istringstream in(s.rng_state); in >> rng >> randn; if (!in) { fprintf(stderr, "[tex-replay] bad RNG state\n"); return 1; } }
++    else rng.seed(cfg.seed);
++    const int tN = (int)s.shc.size(), Mv = (int)s.coords.size();
++    const int steps = cfg.tex_steps > 0 ? cfg.tex_steps : (cfg.steps > 0 ? cfg.steps : 12);
++    printf("[tex-replay] %d SLAT tokens, %d voxels @res%d, %s, %d steps\n", tN, Mv, s.res,
++           exact ? "run's own RNG state" : ("seed " + std::to_string(cfg.seed)).c_str(), steps);
++    const std::vector<float> neg(s.cond.size(), 0.0f);
++    std::vector<float> texlat;
++    try {
++        trellis::Model m = trellis::Model::load(cfg.models + "/tex_flow_512.gguf", cfg.gpu);
++        if (m.try_get("blocks.0.cross_attn.proj_linear.weight"))
++            throw std::runtime_error("--model trellis but the checkpoint has cross_attn.proj_linear");
++        trellis::DiTParams p; p.in_ch = 64; p.out_ch = 32; p.d_cond = 1024; p.cast_f32 = F32;
++        p.proj_ch = 0; p.proj_mode = false;
++        trellis::DitRunner* run = trellis::make_sparse_runner(m, p, s.shc, s.Lc);
++        trellis::FlowFwd fwd = [&](const std::vector<float>& st, float ts, const trellis::FlowCond& c) {
++            std::vector<float> x64((size_t)64 * tN);
++            for (int n = 0; n < tN; ++n) {
++                for (int k = 0; k < 32; ++k) x64[(size_t)k + 64*n]      = st[(size_t)k + 32*n];
++                for (int k = 0; k < 32; ++k) x64[(size_t)32 + k + 64*n] = s.slat_norm[(size_t)k + 32*n];
++            }
++            return run->forward(x64, ts, c);
++        };
++        trellis::SamplerParams sp; sp.steps=steps; sp.guidance_strength=1.0f; sp.guidance_rescale=0.0f; sp.gi0=0.6f; sp.gi1=0.9f; sp.rescale_t=3.0f;
++        std::vector<float> init((size_t)32 * tN);
++        for (auto& x : init) x = randn(rng);
++        texlat = trellis::sample_flow(fwd, std::move(init), trellis::FlowCond(s.cond.data(), nullptr),
++                                      trellis::FlowCond(neg.data(), nullptr), sp);
++        delete run; m.free();
++    } catch (const std::exception& e) { fprintf(stderr, "[tex-replay] texture flow: %s\n", e.what()); return 1; }
++    for (int n = 0; n < tN; ++n) for (int c = 0; c < 32; ++c) texlat[(size_t)c + 32*n] = texlat[(size_t)c + 32*n]*TEX_STD[c] + TEX_MEAN[c];
++    std::vector<float> pbr;
++    try {
++        trellis::Model decoder = trellis::Model::load(cfg.models + "/tex_dec.gguf", cfg.gpu);
++        pbr = trellis::tex_decode(decoder, texlat, s.shc, s.subs); decoder.free();
++    } catch (const std::exception& e) { fprintf(stderr, "[tex-replay] texture decoder: %s\n", e.what()); return 1; }
++    if (pbr.size() != (size_t)Mv * 6) { fprintf(stderr, "[tex-replay] decoder returned %zu values, expected %d\n", pbr.size(), Mv * 6); return 1; }
++    std::vector<float> decoded((size_t)Mv * 6);
++    auto cl = [](float v){ return v < 0 ? 0.f : (v > 1 ? 1.f : v); };
++    for (int i = 0; i < Mv; ++i) for (int k = 0; k < 6; ++k) decoded[(size_t)i*6 + k] = cl(pbr[(size_t)k + 6*i] * 0.5f + 0.5f);
++    FILE* of = fopen(cfg.dump_post.c_str(), "wb");
++    if (!of) { fprintf(stderr, "[tex-replay] cannot write %s\n", cfg.dump_post.c_str()); return 1; }
++    ok = fwrite(ph, 4, 4, of) == 4 && fwrite(mesh_bytes.data(), 1, mesh_bytes.size(), of) == mesh_bytes.size() &&
++         fwrite(pc.data(), 12, pc.size(), of) == pc.size() && fwrite(decoded.data(), 4, decoded.size(), of) == decoded.size();
++    ok = fclose(of) == 0 && ok;
++    if (!ok) { fprintf(stderr, "[tex-replay] failed writing %s\n", cfg.dump_post.c_str()); return 1; }
++    printf("[tex-replay] done in %.1fs -> %s\n", now() - t0, cfg.dump_post.c_str());
++    return 0;
++}
++
+ int trellis_run(const trellis::TrellisParams& cfg) {
+     if (!cfg.capture_stages.empty() && (cfg.cascade || cfg.texture || cfg.bg_only ||
+             cfg.family != trellis::ModelFamily::Trellis)) {
+@@ -237,6 +386,7 @@ int trellis_run(const trellis::TrellisParams& cfg) {
+     std::mt19937 rng(run_seed); std::normal_distribution<float> randn(0.f, 1.f);
+     auto noise = [&](size_t n){ vector<float> v(n); for (auto& x : v) x = randn(rng); return v; };
+     double t0 = now();
++    if (!cfg.tex_replay.empty()) return tex_replay_run(cfg, F32, t0);
+ 
+     bool birefnet = cfg.birefnet == 1;
+     if (cfg.birefnet < 0) {
+@@ -647,7 +797,7 @@ int trellis_run(const trellis::TrellisParams& cfg) {
+                 }
+                 return run->forward(x64, ts, c);
+             };
+-            trellis::SamplerParams sp; sp.steps=(cfg.steps>0?cfg.steps:12); sp.guidance_strength=1.0f; sp.guidance_rescale=0.0f; sp.gi0=0.6f; sp.gi1=0.9f; sp.rescale_t=3.0f;
++            trellis::SamplerParams sp; sp.steps=(cfg.tex_steps>0?cfg.tex_steps:(cfg.steps>0?cfg.steps:12)); sp.guidance_strength=1.0f; sp.guidance_rescale=0.0f; sp.gi0=0.6f; sp.gi1=0.9f; sp.rescale_t=3.0f;
+             texlat = trellis::sample_flow(fwd, noise((size_t)32*tN),
+                          trellis::FlowCond(tcond, pix ? pc.proj.data()     : nullptr),
+                          trellis::FlowCond(tneg,  nullptr), sp);  // [32,tN]
+@@ -662,6 +812,19 @@ int trellis_run(const trellis::TrellisParams& cfg) {
+                     decoded[(size_t)i*6 + k] = cl(pbr[(size_t)k + 6*i] * 0.5f + 0.5f);
+             return decoded;
+         };
++        if (const char* sp = std::getenv("TRELLIS_TEX_SESSION")) {
++            if (mixed || pix || cascade) {
++                fprintf(stderr, "[tex-session] only the TRELLIS.2 res-512 texture path is supported; not written\n");
++            } else {
++                texsession::Session ts;
++                ts.shc = shc; ts.slat_norm = slat_norm; ts.Lc = Lc_dec;
++                ts.cond.assign(cond_dec, cond_dec + (size_t)Lc_dec * 1024);
++                ts.subs = so.subs; ts.coords = so.coords; ts.res = so.res;
++                std::ostringstream st; st << rng << ' ' << randn; ts.rng_state = st.str();
++                if (!texsession::write(sp, ts)) fprintf(stderr, "[tex-session] failed writing %s (generation continues without it)\n", sp);
++                else printf("      [dump] texture session -> %s\n", sp);
++            }
++        }
+         const auto texture_rng = rng;
+         pbr6 = decode_texture(mixed);
+         const int Mv = (int)pbr_coords->size();

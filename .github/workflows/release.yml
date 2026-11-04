@@ -1,0 +1,148 @@
+name: Release
+
+# A version tag (v2.10.0-alpha) builds, tests and packages 3re, signs the update manifest and publishes a GitHub
+# Release with SHA-256 checksums and notes from CHANGELOG.md plus the Arabic summary
+# (docs/release-notes/<version>.ar.md). A dry run — "Run workflow" with a version, or a tag containing "dryrun"
+# (v2.9.1-alpha.dryrun.1) — makes a DRAFT release instead (the VERSION file is overwritten on the runner only).
+# The Windows files are not code-signed.
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      dry_run_version:
+        description: 'Draft dry run version, for example 2.9.1-alpha.dryrun.1'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    name: Windows release
+    runs-on: windows-2022
+    timeout-minutes: 150
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Version
+        id: v
+        shell: pwsh
+        run: |
+          if ('${{ github.event_name }}' -eq 'workflow_dispatch' -or '${{ github.ref_name }}' -like '*dryrun*') {
+            $v = if ('${{ github.event_name }}' -eq 'workflow_dispatch') { '${{ inputs.dry_run_version }}' } else { '${{ github.ref_name }}'.TrimStart('v') }
+            $draft = 'true'  # VERSION is set after the tests (they check the committed version)
+          } else {
+            $v = '${{ github.ref_name }}'.TrimStart('v')
+            if ((Get-Content VERSION -TotalCount 1).Trim() -ne $v) { throw "tag v$v does not match the VERSION file" }
+            $draft = 'false'
+          }
+          if ($v -notmatch '^\d+\.\d+\.\d+(-[0-9A-Za-z.]+)?$') { throw "not a version: $v" }
+          "version=$v" >> $env:GITHUB_OUTPUT
+          "draft=$draft" >> $env:GITHUB_OUTPUT
+          "prerelease=$(if ($v.Contains('-')) { 'true' } else { 'false' })" >> $env:GITHUB_OUTPUT
+      - name: Qt 6.8.3 with MinGW 13.1 and Ninja
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.3'
+          host: windows
+          target: desktop
+          arch: win64_mingw
+          tools: 'tools_mingw1310 tools_ninja'
+          cache: true
+      - name: Put MinGW 13.1 and Ninja first on PATH
+        shell: pwsh
+        run: |
+          "$env:IQTA_TOOLS\mingw1310_64\bin" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+          "$env:IQTA_TOOLS\Ninja" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+      - name: Pinned inputs (ONNX Runtime, SAM 2.1 tiny, glTF-Validator)
+        shell: pwsh
+        run: tools/ci/fetch_inputs.ps1 -OnnxRuntime -Sam -GltfValidator
+      - name: Configure
+        shell: bash
+        run: |
+          cmake -S . -B build/ci -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ \
+            -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR" -DTHREERE_UPDATE_REPOSITORY="${{ github.repository }}"
+      - name: Build
+        run: cmake --build build/ci -j 4
+      - name: Test
+        # PowerShell, not Git Bash: Git Bash puts its own /mingw64/bin (an older libstdc++) first on PATH.
+        shell: pwsh
+        run: |
+          $cases = @('A_synthetic_chair/front.png', 'D_character/front.png', 'S_segmentation/subject.png',
+            'E_lowpoly_character/cloaked/front.png', 'F_hooded_reference/front.png', 'C_asym_planter/front.png')
+          $env:PIXEL3D_TRELLIS_IMAGE_CASES = ($cases | ForEach-Object { "$PWD/tests/fixtures/$_" }) -join ';'
+          $env:PATH = "$env:IQTA_TOOLS/mingw1310_64/bin;$env:PATH"
+          ctest --test-dir build/ci -j 2 --timeout 1500 --output-on-failure
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Dry run version (after the tests)
+        if: steps.v.outputs.draft == 'true'
+        shell: pwsh
+        run: |
+          [IO.File]::WriteAllText("$PWD/VERSION", "${{ steps.v.outputs.version }}`n")
+          cmake --build build/ci -j 4
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Build inputs (maintainer-built engine, cleanup, QuadWild, runtimes), every file checked
+        shell: pwsh
+        run: |
+          $pins = Get-Content -Raw tools/release/build-inputs.json | ConvertFrom-Json
+          gh release download $pins.release_tag --repo ${{ github.repository }} --pattern $pins.asset --dir .toolchain/dl --clobber
+          $zip = ".toolchain/dl/$($pins.asset)"
+          if ((Get-FileHash -Algorithm SHA256 $zip).Hash.ToLower() -ne $pins.sha256) { throw 'build inputs zip does not match its pin' }
+          Expand-Archive $zip -DestinationPath .toolchain/build-inputs -Force
+      - name: Package (portable zip, self-test)
+        shell: pwsh
+        run: tools/release/make_package.ps1 -Build build/ci -Inputs .toolchain/build-inputs -QtBin "$env:QT_ROOT_DIR\bin" -Out out
+      - name: Installer (Inno Setup, per-user)
+        shell: pwsh
+        run: |
+          & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" "/DAppVersion=${{ steps.v.outputs.version }}" "/DStageDir=$PWD\out\3re" "/DOutDir=$PWD\out" tools\release\3re.iss
+          if ($LASTEXITCODE -ne 0) { throw 'installer build failed' }
+      - name: Notes, manifest, signature, checksums
+        shell: pwsh
+        env:
+          THREERE_UPDATE_SIGNING_KEY: ${{ secrets.THREERE_UPDATE_SIGNING_KEY }}
+        run: |
+          $v = '${{ steps.v.outputs.version }}'
+          $base = "https://github.com/${{ github.repository }}/releases/download/v$v"
+          python -I tools/release/release_notes.py $v body out/notes.md
+          python -I tools/release/release_notes.py $v en out/notes-en.txt
+          python -I tools/release/release_notes.py $v ar out/notes-ar.txt
+          python -I tools/release/make_manifest.py --version $v --stage out/3re --package "out/3re-$v-windows-x64.zip" --url "$base/3re-$v-windows-x64.zip" `
+            --installer "out/3re-$v-windows-x64-setup.exe" --installer-url "$base/3re-$v-windows-x64-setup.exe" `
+            --notes-en out/notes-en.txt --notes-ar out/notes-ar.txt --commit '${{ github.sha }}' --out out/update-manifest.json
+          $assets = @("3re-$v-windows-x64.zip", "3re-$v-windows-x64-setup.exe", 'update-manifest.json', '3re-update.pub')
+          if ($env:THREERE_UPDATE_SIGNING_KEY) {
+            node tools/release/minisign.mjs sign --file out/update-manifest.json --trusted-comment "3re $v update manifest"
+            if ($LASTEXITCODE -ne 0) { throw 'signing failed' }
+            node tools/release/minisign.mjs verify --file out/update-manifest.json --pub tools/release/3re-update.pub
+            if ($LASTEXITCODE -ne 0) { throw 'the signature does not verify with tools/release/3re-update.pub' }
+            $assets += 'update-manifest.json.minisig'
+          } elseif ('${{ steps.v.outputs.draft }}' -eq 'true') {
+            # A dry run without the secret: everything but the signature, and the notes say so.
+            "`n> **Dry run without the signing secret: update-manifest.json is NOT signed; installed copies will refuse it.**" | Add-Content out/notes.md
+          } else {
+            throw 'the Actions secret THREERE_UPDATE_SIGNING_KEY is not set: a release must be signed'
+          }
+          Copy-Item tools/release/3re-update.pub out/
+          # LF line endings, so `sha256sum -c SHA256SUMS.txt` works as well as certutil.
+          $sums = $assets | ForEach-Object { "{0}  {1}" -f (Get-FileHash -Algorithm SHA256 "out/$_").Hash.ToLower(), $_ }
+          [IO.File]::WriteAllText("$PWD/out/SHA256SUMS.txt", ($sums -join "`n") + "`n")
+          Get-Content out/SHA256SUMS.txt
+      - name: GitHub Release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: v${{ steps.v.outputs.version }}
+          target_commitish: ${{ github.sha }}
+          name: 3re ${{ steps.v.outputs.version }}
+          body_path: out/notes.md
+          draft: ${{ steps.v.outputs.draft }}
+          prerelease: ${{ steps.v.outputs.prerelease }}
+          files: |
+            out/3re-${{ steps.v.outputs.version }}-windows-x64.zip
+            out/3re-${{ steps.v.outputs.version }}-windows-x64-setup.exe
+            out/update-manifest.json
+            out/update-manifest.json.minisig
+            out/SHA256SUMS.txt
+            out/3re-update.pub
