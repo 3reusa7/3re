@@ -71,7 +71,7 @@
 أبني 3re وحدي. هو مجاني ومفتوح المصدر، للجميع. يعمل، لكنه يحتاج إلى صقل، ويسعدني كثيرًا أن تساعدني. لا يلزم أن تكون خبيرًا،
 وكل مساعدة صغيرة تفرق.
 
-- **مطوّرو C++ وQt:** التطبيق نفسه، مثل [الواجهة](https://github.com/3reusa7/3re/issues?q=is%3Aissue%20is%3Aopen%20label%3Aui)
+- **مطوّرو C++‎ وQt:** التطبيق نفسه، مثل [الواجهة](https://github.com/3reusa7/3re/issues?q=is%3Aissue%20is%3Aopen%20label%3Aui)
   و[التحديثات](https://github.com/3reusa7/3re/issues?q=is%3Aissue%20is%3Aopen%20label%3Aupdates).
 - **المهتمون بالرسوميات ثلاثية الأبعاد:** صور اختبار أفضل وطرق أفضل لقياس الجودة:
   [مهام التقييم](https://github.com/3reusa7/3re/issues?q=is%3Aissue%20is%3Aopen%20label%3Aevaluation).
