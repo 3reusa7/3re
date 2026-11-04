@@ -1,0 +1,30 @@
+name: Signing self-test
+
+# Run by hand after setting or replacing the Actions secret THREERE_UPDATE_SIGNING_KEY. Signs a dummy manifest with the
+# secret and verifies it against tools/release/3re-update.pub, the key built into 3re. Publishes nothing and never
+# prints the secret.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  selftest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Sign a dummy manifest and verify it
+        env:
+          THREERE_UPDATE_SIGNING_KEY: ${{ secrets.THREERE_UPDATE_SIGNING_KEY }}
+        run: |
+          if [ -z "$THREERE_UPDATE_SIGNING_KEY" ]; then echo "::error::the secret THREERE_UPDATE_SIGNING_KEY is not set"; exit 1; fi
+          d=$(mktemp -d)
+          echo '{"format":"3re-update-manifest","selftest":"'"$GITHUB_RUN_ID"'"}' > "$d/manifest.json"
+          node tools/release/minisign.mjs sign --file "$d/manifest.json" --trusted-comment "3re signing self-test $GITHUB_RUN_ID"
+          node tools/release/minisign.mjs verify --file "$d/manifest.json" --pub tools/release/3re-update.pub
+          echo tampered >> "$d/manifest.json"
+          if node tools/release/minisign.mjs verify --file "$d/manifest.json" --pub tools/release/3re-update.pub; then
+            echo "::error::a tampered manifest verified"; exit 1
+          fi
+          echo "SIGNING SELF-TEST PASSED: the secret matches tools/release/3re-update.pub"

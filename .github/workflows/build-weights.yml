@@ -1,0 +1,50 @@
+name: Build weights
+
+# Run by hand. Builds 3re's own Q4_0 TRELLIS.2 weights from the original checkpoints and compares them, tensor by
+# tensor, with the published ilintar files (docs/research/own-gguf-weights.md). With "draft_tag" the files also go to
+# a DRAFT release, which nobody outside the repository can see until it is published.
+on:
+  workflow_dispatch:
+    inputs:
+      draft_tag:
+        description: 'Draft release tag for the files, for example weights-trellis2-q4-1 (empty: compare only)'
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Space
+        run: |
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /opt/hostedtoolcache/CodeQL
+          df -h / /mnt
+      - name: Build and compare
+        run: |
+          python -m pip install gguf==0.17.1 numpy
+          python tools/weights/build_q4.py "$HOME/w"
+      - name: Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: weights-report
+          path: ~/w/report.json
+          if-no-files-found: warn
+      - name: Draft release
+        if: inputs.draft_tag != ''
+        run: |
+          cd "$HOME/w"
+          cp src/dinov3/LICENSE* out/DINOv3-LICENSE.txt
+          cp report.json out/
+          (cd out && sha256sum * > SHA256SUMS.txt)
+          gh release create '${{ inputs.draft_tag }}' --repo '${{ github.repository }}' --draft --prerelease \
+            --title '${{ inputs.draft_tag }}' --notes 'Q4_0 weights built by .github/workflows/build-weights.yml' out/*
