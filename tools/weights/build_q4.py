@@ -1,7 +1,7 @@
 """Builds 3re's own Q4_0 weights from the original checkpoints and compares them with the published ilintar files.
 
 Sources at fixed revisions, each checked against its Hugging Face LFS SHA-256; tools/weights/convert.py and
-quantize_gguf.py are trellis.cpp's own, unchanged. The study and its acceptance criteria are in
+quantize_gguf.py are trellis.cpp's own, unchanged; only the rounding of Q4_0 is set below. The study and its acceptance criteria are in
 docs/research/own-gguf-weights.md. Writes <work>/out/*.gguf and <work>/report.json.
 usage: python tools/weights/build_q4.py <work folder>
 """
@@ -116,7 +116,7 @@ def compare(name):
 
 
 def q4_float32(cls, blocks):
-    """gguf-py's Q4_0 with plain float32 rounding (gguf-py emulates fused multiply-add here)."""
+    """gguf-py's Q4_0 with plain float32 rounding, as in the published files (gguf-py emulates fused multiply-add)."""
     n = blocks.shape[0]
     imax = abs(blocks).argmax(axis=-1, keepdims=True)
     d = np.take_along_axis(blocks, imax, axis=-1) / np.float32(-8)
@@ -129,8 +129,7 @@ def q4_float32(cls, blocks):
 
 
 def main():
-    if os.environ.get("Q4_ROUNDING") == "float32":
-        gguf.quants.Q4_0.quantize_blocks = classmethod(q4_float32)
+    gguf.quants.Q4_0.quantize_blocks = classmethod(q4_float32)
     pins = sources()
     references()
     env = dict(os.environ, TRELLIS_MODELS=SRC, TRELLIS_GGUF_OUT=GGUF)

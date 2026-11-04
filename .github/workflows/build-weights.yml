@@ -9,14 +9,6 @@ on:
       draft_tag:
         description: 'Draft release tag for the files, for example weights-trellis2-q4-1 (empty: compare only)'
         required: false
-      packages:
-        description: 'Python packages for the tools'
-        required: false
-        default: 'gguf==0.17.1 numpy'
-      rounding:
-        description: 'Q4_0 rounding: gguf (fused multiply-add) or float32'
-        required: false
-        default: 'gguf'
 
 permissions:
   contents: write
@@ -37,10 +29,8 @@ jobs:
           sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /opt/hostedtoolcache/CodeQL
           df -h / /mnt
       - name: Build and compare
-        env:
-          Q4_ROUNDING: ${{ inputs.rounding }}
         run: |
-          python -m pip install ${{ inputs.packages }}
+          python -m pip install gguf==0.17.1 numpy==2.5.4
           python tools/weights/build_q4.py "$HOME/w"
       - name: Report
         if: always()
@@ -55,6 +45,7 @@ jobs:
           cd "$HOME/w"
           cp src/dinov3/LICENSE* out/DINOv3-LICENSE.txt
           cp report.json out/
+          cp "$GITHUB_WORKSPACE/tools/weights/NOTICE.txt" out/
           (cd out && sha256sum * > SHA256SUMS.txt)
           gh release create '${{ inputs.draft_tag }}' --repo '${{ github.repository }}' --draft --prerelease \
-            --title '${{ inputs.draft_tag }}' --notes 'Q4_0 weights built by .github/workflows/build-weights.yml' out/*
+            --title '${{ inputs.draft_tag }}' --notes 'TRELLIS.2 Q4_0 weights for 3re, built by .github/workflows/build-weights.yml from the Microsoft checkpoints. MIT, except dinov3.gguf under the DINOv3 License: see NOTICE.txt. Built with DINOv3.' out/*
