@@ -14,6 +14,7 @@ import urllib.request
 
 import gguf
 import numpy as np
+from quantize_gguf import quantize_file
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 WORK = os.path.abspath(sys.argv[1])
@@ -114,7 +115,22 @@ def compare(name):
     return row
 
 
+def q4_float32(cls, blocks):
+    """gguf-py's Q4_0 with plain float32 rounding (gguf-py emulates fused multiply-add here)."""
+    n = blocks.shape[0]
+    imax = abs(blocks).argmax(axis=-1, keepdims=True)
+    d = np.take_along_axis(blocks, imax, axis=-1) / np.float32(-8)
+    with np.errstate(divide="ignore"):
+        inv = np.where(d == 0, np.float32(0), np.float32(1) / d)
+    qs = np.trunc(blocks * inv + np.float32(8.5)).astype(np.uint8).clip(0, 15)
+    qs = qs.reshape((n, 2, cls.block_size // 2))
+    qs = qs[..., 0, :] | (qs[..., 1, :] << np.uint8(4))
+    return np.concatenate([d.astype(np.float16).view(np.uint8), qs], axis=-1)
+
+
 def main():
+    if os.environ.get("Q4_ROUNDING") == "float32":
+        gguf.quants.Q4_0.quantize_blocks = classmethod(q4_float32)
     pins = sources()
     references()
     env = dict(os.environ, TRELLIS_MODELS=SRC, TRELLIS_GGUF_OUT=GGUF)
@@ -124,7 +140,7 @@ def main():
     for c in COMPONENTS:
         subprocess.run([sys.executable, os.path.join(HERE, "convert.py"), c], env=env, check=True)
         f16, name = os.path.join(GGUF, c + ".gguf"), c + ".gguf"
-        subprocess.run([sys.executable, os.path.join(HERE, "quantize_gguf.py"), f16, os.path.join(OUT, name), "Q4_0"], check=True)
+        quantize_file(f16, os.path.join(OUT, name), "Q4_0")
         os.remove(f16)
         rows.append(compare(name))
         print(json.dumps({k: v for k, v in rows[-1].items() if not k.startswith("only")}), flush=True)
