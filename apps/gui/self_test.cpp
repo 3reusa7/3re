@@ -1,5 +1,6 @@
 #include "self_test.hpp"
 
+#include <QCoreApplication>
 #include <QCryptographicHash>
 #include <QDir>
 #include <QFile>
@@ -10,7 +11,9 @@
 #include <QJsonObject>
 
 #include <algorithm>
+#include <filesystem>
 
+#include "agent/agent_godot.hpp"
 #include "backends/trellis_backend.hpp"
 #include "backends/trellis_diagnostics.hpp"
 #include "segmentation/sam_engine.hpp"
@@ -88,6 +91,27 @@ QList<SelfTestItem> run_self_test(const QString& appDir, bool deep) {
     if (!QFileInfo(app.filePath(helper)).isFile()) add("helpers", false, QStringLiteral("missing %1").arg(helper));
   if (std::none_of(items.begin(), items.end(), [](const SelfTestItem& i) { return i.name == "helpers"; }))
     add("helpers", true, QStringLiteral("asset inspect, geometry audit, CUDA probe, auto texture"));
+
+  // 2.10.0: the agent's delivery verification is a real Godot 4 import; without it no asset can PASS, so a
+  // release that cannot run it fails. --deep imports a one-triangle GLB headless.
+  {
+    const auto g = p3dagent::locate_godot();
+    if (!g.found()) {
+      add("delivery_verification", false, QString::fromStdString(p3dagent::describe_godot(g)));
+    } else if (deep) {
+      const auto work = std::filesystem::temp_directory_path() / ("3re-self-test-godot-" + std::to_string(QCoreApplication::applicationPid()));
+      const auto smoke = p3dagent::godot_smoke_test(g.exe, work);
+      std::error_code ec;
+      std::filesystem::remove_all(work, ec);
+      add("delivery_verification", smoke.ok,
+          QStringLiteral("Godot %1 (%2, %3): %4 (%5 s)")
+              .arg(QString::fromStdString(g.version), QString::fromStdString(g.source), QDir::toNativeSeparators(QString::fromStdWString(g.exe.wstring())),
+                   QString::fromStdString(smoke.detail))
+              .arg(smoke.seconds, 0, 'f', 1));
+    } else {
+      add("delivery_verification", true, QString::fromStdString(p3dagent::describe_godot(g)));
+    }
+  }
 
   if (configOk) {
     // The engine program ships with 3re; its GPU libraries, the weights and SAM are downloaded on first use

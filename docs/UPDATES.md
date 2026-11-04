@@ -62,7 +62,7 @@ Updating needs write access to the folder that contains the 3re folder. The inst
 | Pack | Size | From | Licence |
 |---|---|---|---|
 | GPU engine libraries (ggml, CUDA 12 runtime) | 642 MB zip | trellis.cpp v0.8.1 release | MIT; NVIDIA CUDA EULA |
-| TRELLIS.2 weights, Q4 | 4.20 GB | huggingface.co/ilintar/trellis2-gguf @ a57397bd | MIT; dinov3.gguf: DINOv3 License |
+| TRELLIS.2 weights, Q4 | 4.20 GB | github.com/3reusa7/3re, release weights-trellis2-q4-1 | MIT; dinov3.gguf: DINOv3 License |
 | SAM 2.1 tiny, ONNX | 117 MB zip | huggingface.co/vietanhdev/segment-anything-2.1-onnx-models @ 6a3ac868 | Apache-2.0 |
 
 Every file is pinned by size and SHA-256 at a fixed revision; archives are unpacked and each extracted file is

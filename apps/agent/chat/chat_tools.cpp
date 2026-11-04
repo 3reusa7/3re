@@ -548,6 +548,18 @@ json Tools::run_agent(const json& a) {
   const fs::path out = r.spec->output_dir;
   if (fs::exists(out) && !fs::is_empty(out)) return fail("the run folder exists and is not empty: " + u8(out));
   if (!started_by_test_ && !fs::exists(env_.agent_exe)) return fail("3re-agent.exe was not found at " + u8(env_.agent_exe));
+  // 2.10.0: without Godot no asset can PASS; say so before a long run instead of after it.
+  json godot = json::object();
+  if (r.spec->acceptance.require_godot_import && (env_.find_godot || !started_by_test_)) {
+    fs::path named;
+    for (size_t i = 0; i + 1 < env_.agent_args.size(); ++i)
+      if (env_.agent_args[i] == "--godot") named = from_u8(env_.agent_args[i + 1]);
+    const auto g = env_.find_godot ? env_.find_godot() : p3dagent::locate_godot(named);
+    if (!g.found())
+      return {{"ok", false}, {"waiting", true}, {"godot_missing", true}, {"reason", p3dagent::describe_godot(g)}, {"problem", g.problem},
+              {"spec", u8(spec)}};
+    godot = {{"version", g.version}, {"exe", u8(g.exe)}, {"source", g.source}};
+  }
   // W5: measured before the start; when the machine is not ready the run waits (nothing is started half-way).
   const bool generates = r.spec->kind == p3dagent::InputKind::Picture;
   auto adm = admit_run(generates, env_.free_ram_mib(), env_.agents_running());
@@ -560,7 +572,7 @@ json Tools::run_agent(const json& a) {
   fs::create_directories(out.parent_path());
   std::string error;
   if (!env_.start_agent(spec, out, error)) return fail(error);
-  return {{"ok", true}, {"run", u8(out)}, {"spec", u8(spec)}, {"mode", "ask (questions come to this chat)"}, {"admitted", adm.reason}};
+  return {{"ok", true}, {"run", u8(out)}, {"spec", u8(spec)}, {"mode", "ask (questions come to this chat)"}, {"admitted", adm.reason}, {"godot", godot}};
 }
 
 namespace {

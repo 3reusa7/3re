@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 #include <nlohmann/json.hpp>
+#include "agent/agent_godot.hpp"
 
 namespace p3dchat {
 
@@ -127,6 +128,9 @@ struct ToolEnv {
   std::function<uint64_t()> free_ram_mib;
   std::function<int()> agents_running;
   std::vector<std::string> agent_args;  // extra 3re-agent arguments (development runs: --config, --workers, --godot, ...)
+  // 2.10.0: Godot for the delivery check, looked up before a run starts (tests replace it; tests that replace
+  // start_agent and not this skip the check). Default: p3dagent::locate_godot with the --godot of agent_args.
+  std::function<p3dagent::GodotLocation()> find_godot;
 };
 
 // W5 admission rule for one agent run (measured numbers in, decision and reason out).

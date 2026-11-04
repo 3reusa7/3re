@@ -84,12 +84,12 @@ StudioWindow::StudioWindow(const WindowOptions& opt, QWidget* parent) : QMainWin
   pixel_->setWindowFlags(Qt::Widget);
   ai_ = new Image3DWorkspace(opt.software_view, nullptr);
 
-  // Milestone 4 (W1): the Agent is the first workspace and the page 3re opens on.
+  // 2.10.0: Home is the first page and the page 3re opens on; the Agent directly under it.
+  home_ = new HomePage(this);
+  addPage("home", tr("Home"), icon(Icon::Home), tr("Home"), tr("Start a new model or continue where you left off"), home_);
   agent_ = new AgentPage(this);
   addPage("agent", tr("Agent"), icon(Icon::Validate), tr("Asset Agent"),
           tr("Tell the agent what you need, or watch a run: every stage, tool, decision and candidate; answer its questions"), agent_);
-  home_ = new HomePage(this);
-  addPage("home", tr("Home"), icon(Icon::Home), tr("Home"), tr("Start a new model or continue where you left off"), home_);
   addPage("image", tr("Image\nto 3D"), icon(Icon::ImageTo3D), tr("Image to 3D"),
           tr("One picture of an object or character becomes a 3D model"), buildImagePage());
   retopo_ = new RetopoWorkspace(opt.software_view, this);
@@ -141,7 +141,7 @@ StudioWindow::StudioWindow(const WindowOptions& opt, QWidget* parent) : QMainWin
     sc->setContext(Qt::WindowShortcut);
     connect(sc, &QShortcut::activated, this, [this, i] { showPage(ids_[i]); });
   }
-  showPage("agent");
+  showPage("home");
 }
 
 StudioWindow::~StudioWindow() = default;

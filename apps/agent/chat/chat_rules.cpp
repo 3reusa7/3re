@@ -271,6 +271,15 @@ Reply RulesProvider::next(const std::vector<Message>& c, const json&) {
       return r;
     }
     if (last.tool == "run_agent") {
+      if (!ok && res.value("godot_missing", false)) {
+        r.text = L.t("Not started: Godot 4 was not found on this computer, so the delivery cannot be imported and checked and no model can "
+                     "PASS. Install Godot 4 (godotengine.org) or choose its console executable in Settings > Delivery check (Godot), then "
+                     "say \"start\".",
+                     "لم يبدأ: لم أجد Godot 4 على هذا الجهاز، فلا يمكن استيراد التسليم وفحصه ولن يصل أي نموذج إلى PASS. ثبّت Godot 4 "
+                     "(godotengine.org) أو اختر ملفه التنفيذي console من الإعدادات ← فحص التسليم (Godot)، ثم قل \"ابدأ\".");
+        if (!res.value("problem", std::string()).empty()) r.text += "\n" + res["problem"].get<std::string>();
+        return r;
+      }
       if (!ok && res.value("waiting", false)) {
         r.text = L.t("Not started yet — the machine is not ready (measured): ", "لم يبدأ بعد — الجهاز غير جاهز (مقاس): ") + res.value("reason", std::string()) +
                  L.t(". Say \"start\" when you want me to check again.", ". قل \"ابدأ\" عندما تريدني أن أتحقق مجدداً.");
@@ -298,6 +307,8 @@ Reply RulesProvider::next(const std::vector<Message>& c, const json&) {
         o << "\n" << L.t("Note: delivery is checked in Godot only; the GLB also opens in Unity/Unreal, but their import is not verified by 3re.",
                          "ملاحظة: التسليم يُفحص في Godot فقط؛ ملف GLB يفتح في Unity/Unreal أيضاً لكن 3re لا يتحقق من استيرادهما.");
       if (asked.wants_rigging) o << "\n" << capability_rigging(L);
+      if (const auto g = res.value("godot", json::object()); !g.value("version", std::string()).empty())
+        o << "\n" << L.t("Delivery check: Godot ", "فحص التسليم: Godot ") << g.value("version", "") << " — " << g.value("exe", "");
       r.text = o.str();
       return r;
     }

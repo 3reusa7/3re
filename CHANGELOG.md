@@ -3,7 +3,25 @@
 The one active release is `dist\3re\` (start `3re.exe`), updated by `tools\package.ps1`
 (see `docs\RELEASING.md`); earlier builds are archived in `retile-archive\`.
 
-## Unreleased — open source: Apache-2.0, signed updates, AI models downloaded on first use
+## 2.10.0-alpha - 2026-11-03 — Godot delivery check in the installed app; no mirrored delivery; Home first
+
+- **Godot found by itself.** The agent's delivery check (a real Godot 4 headless import) now finds an installed Godot
+  without setup: `--godot`, `THREERE_GODOT`, the path in **Settings > Delivery check (Godot)**, then PATH, Program
+  Files, WinGet, Scoop, Steam, Desktop / Downloads / Documents and their Godot folders (console builds and the newest
+  4.x first; a GUI build is replaced by the console build next to it). Settings shows where it was found and checks it.
+- **Clear message when Godot is missing**: the chat does not start a run that cannot PASS; it says why and how to fix
+  it (Arabic or English) and starts on "start" once Godot is there. The agent run shows "Delivery check: Godot …" or
+  "Delivery check unavailable" in its pre-flight (run viewer), with the reason.
+- **Release self-test**: `delivery_verification` fails the release when Godot 4 is not available; `--deep` imports a
+  one-triangle GLB headless in Godot.
+- **No mirrored or negative scale in any delivery (G0)**: every delivered GLB is audited — mirrored (negative
+  determinant), non-uniform or sheared node transforms, non-rigid part pivots, winding against normals, tangents —
+  as the agent's `transform_hygiene` criterion (FAIL blocks PASS). Developer tools: `pixel3d-asset-quality hygiene|bake` and an external
+  Blender check (`tools/asset_quality/blender_check.py`, Blender not shipped).
+- **Navigation**: Home is the first page and the page 3re opens on; the Agent directly under it (Ctrl+1 Home, Ctrl+2
+  Agent, …).
+
+First public release: open source under Apache-2.0.
 
 - **Updates from GitHub Releases** (Settings → Updates): stable or alpha channel, a daily check that can be turned
   off and sends nothing about you, "what's new" in plain words before anything downloads. Every update is verified
@@ -16,6 +34,7 @@ The one active release is `dist\3re\` (start `3re.exe`), updated by `tools\packa
 - `3re.exe --self-test`: models that are not downloaded yet are a warning, a damaged one fails `--deep`.
 - Apache-2.0 licence, NOTICE, rewritten third-party notices; README in English and Arabic; CI on every pull request
   (Windows build and tests, lint, licence and secret scans) and a release workflow with checksums and a signed manifest.
+
 
 ## 2.9.1-alpha - 2026-11-01 — chat: re-texture with more or corrected pictures; brain evaluation
 

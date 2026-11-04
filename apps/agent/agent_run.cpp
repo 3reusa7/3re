@@ -15,7 +15,9 @@
 #include "agent_exec.hpp"
 #include "agent_fidelity.hpp"
 #include "agent_glb.hpp"
+#include "agent_godot.hpp"
 #include "agent_gltf_decimate.hpp"
+#include "agent_hygiene.hpp"
 #include "agent_plan.hpp"
 #include "agent_probe.hpp"
 #include "agent_recovery.hpp"
@@ -32,45 +34,6 @@ using nlohmann::json;
 using pixel3d::to_utf8;
 using Clock = std::chrono::steady_clock;
 
-// Godot scene check: instantiate every imported GLB, count triangles and materials, world AABB.
-constexpr const char* kGodotCheck = R"GD(extends SceneTree
-func _count(n, parent_xf, acc):
-	var xf = parent_xf
-	if n is Node3D:
-		xf = parent_xf * n.transform
-	if n is MeshInstance3D and n.mesh:
-		acc.meshes += 1
-		for s in n.mesh.get_surface_count():
-			var arr = n.mesh.surface_get_arrays(s)
-			var idx = arr[Mesh.ARRAY_INDEX]
-			acc.triangles += (idx.size() / 3) if idx != null else (arr[Mesh.ARRAY_VERTEX].size() / 3)
-			if n.get_active_material(s) != null:
-				acc.materials += 1
-		var b = xf * n.get_aabb()
-		if acc.has_box:
-			acc.box = acc.box.merge(b)
-		else:
-			acc.box = b
-			acc.has_box = true
-	for c in n.get_children():
-		_count(c, xf, acc)
-func _init():
-	var out = {}
-	for f in DirAccess.get_files_at("res://"):
-		if not f.ends_with(".glb"):
-			continue
-		var res = load("res://" + f)
-		var acc = {"loaded": res != null, "meshes": 0, "triangles": 0, "materials": 0, "has_box": false, "box": AABB()}
-		if res is PackedScene:
-			var node = res.instantiate()
-			_count(node, Transform3D.IDENTITY, acc)
-			node.free()
-		var b = acc.box
-		out[f] = {"loaded": acc.loaded, "meshes": acc.meshes, "triangles": acc.triangles, "materials": acc.materials,
-			"aabb_position": [b.position.x, b.position.y, b.position.z], "aabb_size": [b.size.x, b.size.y, b.size.z]}
-	print("P3D_RESULT " + JSON.stringify(out))
-	quit()
-)GD";
 
 fs::path exe_dir() {
   wchar_t buf[32768];
@@ -868,6 +831,17 @@ Texture Runner::texture_candidates(const Source& src, const fs::path& mesh, cons
 
 json Runner::validate(const fs::path& delivered, const GlbInfo& info) {
   json m = json::object();
+  // G0 transform hygiene (docs/agent/ASSET-QUALITY.md): mirrored / non-uniform nodes, winding vs normals, tangents.
+  try {
+    const auto a = audit_hygiene(read_glb(delivered));
+    const auto v = judge_hygiene(a, 0.02);
+    m["hygiene"] = a.to_json();
+    m["hygiene_status"] = v.status;
+    m["hygiene_reasons"] = v.reasons;
+  } catch (const std::exception& e) {
+    m["hygiene_status"] = "FAIL";
+    m["hygiene_reasons"] = {std::string("unreadable: ") + e.what()};
+  }
   // Khronos glTF validator.
   if (caps_.has("validator")) {
     const auto r = step("khronos", "Khronos glTF-Validator", caps_.tools["validator"].path, {to_utf8(delivered), "-o"}, "validate", {}, {}, 600);
@@ -899,7 +873,7 @@ json Runner::validate(const fs::path& delivered, const GlbInfo& info) {
     const auto proj = work_ / "godot";
     fs::create_directories(proj);
     write_text_new(proj / "project.godot", "config_version=5\n\n[application]\nconfig/name=\"3re_agent_check\"\n");
-    write_text_new(proj / "check.gd", kGodotCheck);
+    write_text_new(proj / "check.gd", godot_check_script());
     fs::copy_file(delivered, proj / "asset.glb");
     const auto gd = caps_.tools["godot"].path;
     const auto r1 = step("godot_import", "Godot " + caps_.tools["godot"].version + " --headless --import", gd,
@@ -1003,12 +977,26 @@ int Runner::run() {
   pin.workers_dir = opt_.workers.empty() ? here : opt_.workers.front();
   for (size_t i = 1; i < opt_.workers.size(); ++i) pin.extra_worker_dirs.push_back(opt_.workers[i]);
   pin.extra_worker_dirs.push_back(here);
-  pin.godot = !opt_.godot.empty() ? opt_.godot : pixel3d::path_from_utf8(env("THREERE_GODOT"));
+  // 2.10.0: --godot, THREERE_GODOT, the Settings path, else the usual install places.
+  const auto godot = locate_godot(opt_.godot);
+  // Not usable: the named path (if any) goes to the probe, which records it as not found.
+  pin.godot = godot.found() ? godot.exe : opt_.godot == fs::path("none") ? fs::path() : !opt_.godot.empty() ? opt_.godot
+                                                                         : pixel3d::path_from_utf8(env("THREERE_GODOT"));
+  json searched = json::array();
+  for (const auto& d : godot.searched) searched.push_back(to_utf8(d));
+  log_.append({{"event", "godot"}, {"found", godot.found()}, {"exe", to_utf8(godot.exe)}, {"version", godot.version}, {"source", godot.source},
+               {"problem", godot.problem}, {"searched", searched}});
+  say("delivery check: " + describe_godot(godot));
   pin.validator = !opt_.validator.empty() ? opt_.validator : here / "gltf_validator.exe";
   pin.disk_path = out_;
   pin.hash_weights = opt_.hash_weights;
   say("probing tools and machine" + std::string(pin.hash_weights ? " (hashing TRELLIS weights)" : ""));
   caps_ = probe_capabilities(pin);
+  if (!caps_.tools.count("godot")) {  // nothing found and nothing named: the pre-flight still lists it
+    ToolInfo t;
+    t.note = describe_godot(godot);
+    caps_.tools["godot"] = t;
+  }
   log_.append({{"event", "capabilities"}, {"capabilities", caps_.to_json()}});
   write_text_new(out_ / "capabilities.json", caps_.to_json().dump(1));
   say("RAM free " + std::to_string(caps_.ram_free_mib) + " MiB, GPU " + (caps_.gpu_present ? caps_.gpu_name + " " + std::to_string(caps_.vram_mib) + " MiB" : "none") +

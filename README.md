@@ -82,13 +82,17 @@ The [user guide](docs/USER-GUIDE.md) goes through every page.
 downloads you agree to and, if you leave it on, a daily check of the GitHub releases list (Settings → Updates); it
 sends no account, identifier or usage data.
 
-**Why is the download small but the models big?** The AI weights are not ours to bundle and are large; 3re downloads
-them from their original sources on first use and checks every file's SHA-256 before using it.
+**Why is the download small but the models big?** The AI weights are large, so they are not in the package: 3re
+downloads them on first use, after you agree, and checks every file's SHA-256 before using it.
 
 **Can I use 3re commercially?** 3re's code is Apache-2.0. The models have their own terms: TRELLIS.2 is MIT, its
 DINOv3 image encoder is under Meta's DINOv3 License, SAM 2.1 is Apache-2.0
 ([third-party notices](THIRD-PARTY-NOTICES.txt)). You are responsible for having the rights to the pictures you put
 in. This is not legal advice.
+
+**Why does Windows warn about 3re?** The builds are not code-signed, which needs a paid certificate. Choose "More
+info", then "Run anyway". To be sure of what you downloaded, compare it with `SHA256SUMS.txt` in the release:
+`certutil -hashfile <file> SHA256`.
 
 **Does it work without an NVIDIA GPU?** The pixel-art features do. Image to 3D needs CUDA.
 

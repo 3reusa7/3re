@@ -1,7 +1,7 @@
 #pragma once
 // `3re-studio --self-test`: checks that a release folder is complete and self-contained
 // (config with relative paths only, runtime, pinned checksums, models, segmentation,
-// helpers, CUDA probe). Used by tools/package.ps1 and tools/verify_portable.ps1.
+// helpers, Godot delivery verification, CUDA probe). Used by tools/package.ps1 and tools/verify_portable.ps1.
 #include <QByteArray>
 #include <QList>
 #include <QString>

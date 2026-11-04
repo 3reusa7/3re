@@ -10,7 +10,6 @@ Contents (all redistributable; sources in brackets):
   engine/trellis-cli.exe, BUILD.txt, texture-candidates.patch  3re's trellis.cpp fork (MIT) [tools/trellis/engine-patch]
   engine/pixel3d-trellis-post-safe.exe                         verified cleanup build of tools/trellis/post_geometry_safe.cpp
   engine/libgcc_s_seh-1.dll, libstdc++-6.dll, libwinpthread-1.dll   MinGW runtime of the engine (GCC runtime exception)
-  msvc/*.dll                                                   Microsoft Visual C++ runtime 14.51 (app-local)
   quadwild/**                                                  QuadWild-BiMDF runtime, licence and corresponding source (GPL-3.0)
 """
 import hashlib
@@ -21,7 +20,7 @@ import zipfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 TC = os.path.realpath(os.path.join(ROOT, ".toolchain"))
-VERSION = 2
+VERSION = 3
 
 SOURCES = [
     ("engine/trellis-cli.exe", "trellis-fork/tex-candidates-4e19aa96/trellis-cli.exe"),
@@ -49,8 +48,6 @@ def sha(path):
 def main():
     out_dir = sys.argv[1]
     entries = list(SOURCES)
-    for name in sorted(os.listdir(os.path.join(TC, "msvc-runtime", "14.51.36247"))):
-        entries.append(("msvc/" + name, "msvc-runtime/14.51.36247/" + name))
     qw = os.path.join(TC, "quadwild-bimdf", "3re-v5")
     for dirpath, _, names in os.walk(qw):
         for n in sorted(names):

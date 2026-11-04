@@ -7,6 +7,7 @@
 
 #include "agent_exec.hpp"
 #include "agent_glb.hpp"
+#include "agent_godot.hpp"
 #include "pixel3d/common/file_io.hpp"
 #include "pixel3d/common/path_utf8.hpp"
 #include "pixel3d/image/image.hpp"
@@ -45,28 +46,6 @@ ToolInfo tool(const fs::path& path, const std::string& expected = {}) {
   if (!t.verified) t.note = "SHA-256 does not match the pin";
   else if (expected.empty()) t.note = "no pin (hash recorded)";
   return t;
-}
-
-// `exe --version` (first line), with a short time limit.
-std::string version_of(const fs::path& exe) {
-  const auto dir = fs::temp_directory_path() / "3re-agent";
-  std::error_code ec;
-  fs::create_directories(dir, ec);
-  const auto out = dir / ("version-" + std::to_string(GetCurrentProcessId()) + ".txt");
-  fs::remove(out, ec);
-  ProcessSpec p;
-  p.exe = exe;
-  p.args = {"--version"};
-  p.timeout_seconds = 60;
-  p.stdout_file = out;
-  const auto r = run_process(p);
-  std::ifstream in(out);
-  std::string line;
-  std::getline(in, line);
-  in.close();
-  fs::remove(out, ec);
-  while (!line.empty() && (line.back() == '\r' || line.back() == ' ')) line.pop_back();
-  return r.exit_code == 0 ? line : std::string();
 }
 
 }  // namespace
@@ -120,7 +99,7 @@ Capabilities probe_capabilities(const ProbeInputs& in) {
   if (!in.godot.empty()) {
     auto g = tool(in.godot);
     if (g.present) {
-      g.version = version_of(in.godot);
+      g.version = godot_version(in.godot);
       if (g.version.rfind("4.", 0) != 0) {
         g.verified = false;
         g.note = "not a Godot 4 console executable (--version: '" + g.version + "')";

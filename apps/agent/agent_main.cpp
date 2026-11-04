@@ -1,5 +1,5 @@
 // 3re-agent.exe spec.json [--out DIR] [--config 3re.config.json] [--app-dir DIR] [--workers DIR]...
-//                [--godot GODOT_CONSOLE_EXE] [--validator gltf_validator.exe] [--no-hash-weights]
+//                [--godot GODOT_CONSOLE_EXE|none] [--validator gltf_validator.exe] [--no-hash-weights]
 //                [--ask [--wait-seconds N]] [--answers answers.json]
 // 3re-agent.exe --answer RUN_DIR QUESTION_ID CHOICE [--picture FILE] [--label back|left|right|...] [--who NAME]
 // The Game-Ready Asset Agent (docs/agent/PLAN.md, PLAN-M3.md). Without --ask the agent never waits: a question is
@@ -64,7 +64,7 @@ int wmain(int argc, wchar_t** argv) {
   auto usage = [] {
     std::fprintf(stderr,
                  "usage: 3re-agent spec.json [--out DIR] [--config 3re.config.json] [--app-dir DIR] [--workers DIR]...\n"
-                 "                 [--godot GODOT_CONSOLE_EXE] [--validator gltf_validator.exe] [--no-hash-weights]\n"
+                 "                 [--godot GODOT_CONSOLE_EXE|none] [--validator gltf_validator.exe] [--no-hash-weights]\n"
                  "                 [--ask [--wait-seconds N]] [--answers answers.json]\n"
                  "       3re-agent --answer RUN_DIR QUESTION_ID CHOICE [--picture FILE] [--label LABEL] [--who NAME]\n");
     return 4;

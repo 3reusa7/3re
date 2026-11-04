@@ -34,10 +34,10 @@ class StudioTests : public QObject {
  private slots:
   void studio_has_eight_pages() {
     p3dgui::StudioWindow s(options());
-    // Milestone 4 (W1): the Agent is the first workspace and the start page.
-    const QStringList ids{"agent", "home", "image", "retopo", "export", "rigging", "animation", "settings"};
+    // 2.10.0: Home is the first page and the start page, the Agent directly under it.
+    const QStringList ids{"home", "agent", "image", "retopo", "export", "rigging", "animation", "settings"};
     QCOMPARE(s.pageIds(), ids);
-    QCOMPARE(s.currentPage(), QString("agent"));
+    QCOMPARE(s.currentPage(), QString("home"));
     for (const QString& id : ids) {
       s.showPage(id);
       QCOMPARE(s.currentPage(), id);
@@ -49,13 +49,13 @@ class StudioTests : public QObject {
     p3dgui::StudioWindow s(options());
     s.show();
     QVERIFY(QTest::qWaitForWindowExposed(&s));
-    // Shortcuts follow the rail: Ctrl+1 Agent, Ctrl+2 Home, ..., Ctrl+6 Rigging.
+    // Shortcuts follow the rail: Ctrl+1 Home, Ctrl+2 Agent, ..., Ctrl+6 Rigging.
     QTest::keyClick(&s, Qt::Key_6, Qt::ControlModifier);
     QCOMPARE(s.currentPage(), QString("rigging"));
     QTest::keyClick(&s, Qt::Key_2, Qt::ControlModifier);
-    QCOMPARE(s.currentPage(), QString("home"));
-    QTest::keyClick(&s, Qt::Key_1, Qt::ControlModifier);
     QCOMPARE(s.currentPage(), QString("agent"));
+    QTest::keyClick(&s, Qt::Key_1, Qt::ControlModifier);
+    QCOMPARE(s.currentPage(), QString("home"));
   }
   void animation_is_coming_soon() {
     p3dgui::StudioWindow s(options());

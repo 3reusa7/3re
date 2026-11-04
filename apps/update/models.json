@@ -68,7 +68,7 @@
    "id": "trellis-q4",
    "title": "TRELLIS.2 image-to-3D weights (Q4, 512)",
    "purpose": "Turn a picture into a 3D model (Image to 3D, Agent).",
-   "source": "huggingface.co/ilintar/trellis2-gguf, revision a57397bd",
+   "source": "github.com/3reusa7/3re, release weights-trellis2-q4-1 (quantized from Microsoft's TRELLIS.2)",
    "licence": "MIT (TRELLIS.2 by Microsoft); dinov3.gguf: DINOv3 License (Meta)",
    "licence_urls": [
     "https://huggingface.co/microsoft/TRELLIS.2-4B",
@@ -77,43 +77,43 @@
    "attribution": "Built with DINOv3",
    "files": [
     {
-     "url": "https://huggingface.co/ilintar/trellis2-gguf/resolve/a57397bd3d351599d9729fc144b3f87c3f87d65b/q4/dinov3.gguf",
+     "url": "https://github.com/3reusa7/3re/releases/download/weights-trellis2-q4-1/dinov3.gguf",
      "path": "models/trellis/q4/dinov3.gguf",
      "size": 172662976,
      "sha256": "6473cf96fd275bf84f5cc0556975a2abaa10b641e4a07101dcad561df1917ef2"
     },
     {
-     "url": "https://huggingface.co/ilintar/trellis2-gguf/resolve/a57397bd3d351599d9729fc144b3f87c3f87d65b/q4/ss_flow.gguf",
+     "url": "https://github.com/3reusa7/3re/releases/download/weights-trellis2-q4-1/ss_flow.gguf",
      "path": "models/trellis/q4/ss_flow.gguf",
      "size": 730496672,
      "sha256": "a43c6393ee4a763a03e382de750d4f62752bacf969940442fd856230e62b88c2"
     },
     {
-     "url": "https://huggingface.co/ilintar/trellis2-gguf/resolve/a57397bd3d351599d9729fc144b3f87c3f87d65b/q4/ss_dec.gguf",
+     "url": "https://github.com/3reusa7/3re/releases/download/weights-trellis2-q4-1/ss_dec.gguf",
      "path": "models/trellis/q4/ss_dec.gguf",
      "size": 147379392,
      "sha256": "2790b5eecb261cc877d9bf175ce2bd6dd48cd65be8c042c5f5bc023dfca01cf7"
     },
     {
-     "url": "https://huggingface.co/ilintar/trellis2-gguf/resolve/a57397bd3d351599d9729fc144b3f87c3f87d65b/q4/shape_flow_512.gguf",
+     "url": "https://github.com/3reusa7/3re/releases/download/weights-trellis2-q4-1/shape_flow_512.gguf",
      "path": "models/trellis/q4/shape_flow_512.gguf",
      "size": 730520576,
      "sha256": "de7b87a92280035258c94314258e3b8314de39e5f001eac1ada0b4087785fb63"
     },
     {
-     "url": "https://huggingface.co/ilintar/trellis2-gguf/resolve/a57397bd3d351599d9729fc144b3f87c3f87d65b/q4/shape_dec.gguf",
+     "url": "https://github.com/3reusa7/3re/releases/download/weights-trellis2-q4-1/shape_dec.gguf",
      "path": "models/trellis/q4/shape_dec.gguf",
      "size": 845423552,
      "sha256": "79a52ddfed3454f724683940c11cfbfcf76c427ab3b7fdeb4c3cfc6d26647de4"
     },
     {
-     "url": "https://huggingface.co/ilintar/trellis2-gguf/resolve/a57397bd3d351599d9729fc144b3f87c3f87d65b/q4/tex_flow_512.gguf",
+     "url": "https://github.com/3reusa7/3re/releases/download/weights-trellis2-q4-1/tex_flow_512.gguf",
      "path": "models/trellis/q4/tex_flow_512.gguf",
      "size": 730548224,
      "sha256": "fff7bca6418ad607b8b9ff24034ff63f591d0a9b72f308960bffd6f5cd17390b"
     },
     {
-     "url": "https://huggingface.co/ilintar/trellis2-gguf/resolve/a57397bd3d351599d9729fc144b3f87c3f87d65b/q4/tex_dec.gguf",
+     "url": "https://github.com/3reusa7/3re/releases/download/weights-trellis2-q4-1/tex_dec.gguf",
      "path": "models/trellis/q4/tex_dec.gguf",
      "size": 845414272,
      "sha256": "20b208e402db907c6800dd4ad486a0d6e927e4511a6ff87fb51049794988927b"

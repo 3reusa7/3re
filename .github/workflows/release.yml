@@ -91,9 +91,24 @@ jobs:
           $zip = ".toolchain/dl/$($pins.asset)"
           if ((Get-FileHash -Algorithm SHA256 $zip).Hash.ToLower() -ne $pins.sha256) { throw 'build inputs zip does not match its pin' }
           Expand-Archive $zip -DestinationPath .toolchain/build-inputs -Force
+      - name: Visual C++ runtime (release DLLs from the Visual Studio redist folder)
+        id: msvc
+        shell: pwsh
+        run: |
+          $vs = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath
+          $crt = Get-ChildItem "$vs\VC\Redist\MSVC\*\x64\Microsoft.VC*.CRT" -Directory | Where-Object { $_.FullName -notmatch 'onecore|debug' } | Sort-Object FullName | Select-Object -Last 1
+          if (-not $crt) { throw 'no Visual C++ redist folder found' }
+          Write-Host $crt.FullName
+          "dir=$($crt.FullName)" >> $env:GITHUB_OUTPUT
       - name: Package (portable zip, self-test)
         shell: pwsh
-        run: tools/release/make_package.ps1 -Build build/ci -Inputs .toolchain/build-inputs -QtBin "$env:QT_ROOT_DIR\bin" -Out out
+        run: tools/release/make_package.ps1 -Build build/ci -Inputs .toolchain/build-inputs -QtBin "$env:QT_ROOT_DIR\bin" -MsvcDir '${{ steps.msvc.outputs.dir }}' -Out out
+      - name: Visual C++ runtime of a dry run (for the engine test on a GPU machine)
+        if: steps.v.outputs.draft == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: msvc-runtime
+          path: out/3re/app/*140*.dll
       - name: Installer (Inno Setup, per-user)
         shell: pwsh
         run: |

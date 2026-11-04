@@ -42,3 +42,9 @@ downloaded on first use, `apps/update/models.json`):
    (`tools/release/pack_build_inputs.py` makes a new one).
 
 Installed copies see the new release through Settings > Updates (docs/UPDATES.md).
+
+The Windows files are not code-signed: there is no paid certificate for now. SignPath Foundation offers free signing
+to open-source projects; whether 3re qualifies is still to be checked.
+
+After setting or replacing `THREERE_UPDATE_SIGNING_KEY`, run the workflow "Signing self-test": it signs a dummy manifest
+and verifies it against `tools/release/3re-update.pub`, and publishes nothing.

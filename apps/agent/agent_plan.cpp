@@ -110,7 +110,8 @@ Plan make_plan(const AssetSpec& spec, const Capabilities& caps, const InputFacts
   add("reload", "independent reload (pixel3d-glbcheck, tinygltf)");
   add("godot_import", "real Godot headless import: triangles, AABB/scale, up axis, materials");
   add("report", "report.json + report.md with SHA-256 of every deliverable");
-  if (!caps.has("godot")) p.notes.push_back("Godot not found: the Godot import is UNVERIFIED and the asset cannot PASS");
+  if (!caps.has("godot")) p.notes.push_back("Godot 4 not found on this computer: the Godot import is UNVERIFIED and the asset cannot PASS (install Godot 4 or choose its "
+                                              "console executable in 3re Settings > Delivery check)");
   if (!caps.has("validator")) p.notes.push_back("Khronos validator not found: validation is UNVERIFIED");
   if (!caps.has("decimate")) p.notes.push_back("pixel3d-decimate-guarded not found: an over-budget mesh cannot be reduced");
   return p;

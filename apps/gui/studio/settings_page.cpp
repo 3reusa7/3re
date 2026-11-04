@@ -6,6 +6,7 @@
 #include <QDesktopServices>
 #include <QDir>
 #include <QFileDialog>
+#include <QFileInfo>
 #include <QFormLayout>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -13,6 +14,8 @@
 #include <QMessageBox>
 #include <QProgressBar>
 #include <QPixmap>
+#include <QPointer>
+#include <QStyle>
 #include <QPushButton>
 #include <QScrollArea>
 #include <QSettings>
@@ -22,7 +25,9 @@
 #include <QApplication>
 #include <QFutureWatcher>
 #include <QtConcurrent/QtConcurrentRun>
+#include <thread>
 
+#include "agent/agent_godot.hpp"
 #include "backends/retexture_batch.hpp"
 #include "backends/trellis_backend.hpp"
 #include "icons.hpp"
@@ -82,6 +87,41 @@ SettingsPage::SettingsPage(QWidget* parent) : QWidget(parent) {
   });
   connect(projects_, &QLineEdit::editingFinished, this, [this] { QSettings().setValue("projects/dir", projects_->text()); });
   connect(projects_, &QLineEdit::textChanged, this, [this](const QString& t) { QSettings().setValue("projects/dir", t); });
+
+  // 2.10.0: Godot for the agent's delivery check. Saved in agent-settings.json, which 3re-chat and 3re-agent read.
+  auto* gd = section(col, inner, tr("Delivery check (Godot)"));
+  auto* gdText = make_label(tr("The agent imports every delivered model in Godot 4 (headless) and measures it there; without Godot no "
+                               "model can PASS. 3re finds an installed Godot by itself; choose its console executable here if it is "
+                               "somewhere else."),
+                            "secondary", inner);
+  gdText->setWordWrap(true);
+  gd->addWidget(gdText);
+  godot_ = new QLineEdit(QString::fromStdWString(p3dagent::saved_godot_path().wstring()), inner);
+  godot_->setObjectName("settingsGodot");
+  godot_->setPlaceholderText(tr("Automatic"));
+  auto* gdPick = make_button(tr("Choose…"), "ghost", icon(Icon::Folder), inner);
+  auto* gdCheck = make_button(tr("Check"), "ghost", {}, inner);
+  gdCheck->setObjectName("settingsGodotCheck");
+  auto* gdRow = new QHBoxLayout;
+  gdRow->addWidget(godot_, 1);
+  gdRow->addWidget(gdPick);
+  gdRow->addWidget(gdCheck);
+  gd->addLayout(gdRow);
+  godot_status_ = make_label(QString(), "secondary", inner);
+  godot_status_->setObjectName("settingsGodotStatus");
+  godot_status_->setWordWrap(true);
+  godot_status_->setTextInteractionFlags(Qt::TextSelectableByMouse);
+  gd->addWidget(godot_status_);
+  connect(gdPick, &QPushButton::clicked, this, [this] {
+    const auto f = QFileDialog::getOpenFileName(this, tr("Godot 4 console executable"), QFileInfo(godot_->text()).absolutePath(),
+                                                tr("Godot (Godot*.exe godot*.exe);;Programs (*.exe)"));
+    if (f.isEmpty()) return;
+    godot_->setText(QDir::toNativeSeparators(f));
+    saveGodot();
+  });
+  connect(godot_, &QLineEdit::editingFinished, this, &SettingsPage::saveGodot);
+  connect(gdCheck, &QPushButton::clicked, this, &SettingsPage::refreshGodot);
+  refreshGodot();
 
   // Re-texture all saved models: the current texture engine once more on every saved generation that still
   // has TRELLIS's texture next to it. New files only (textured-v2.glb); projects then open with them.
@@ -323,6 +363,39 @@ SettingsPage::SettingsPage(QWidget* parent) : QWidget(parent) {
 }
 
 void SettingsPage::setDiagnostics(const QString& text) { diag_text_->setText(text); }
+
+void SettingsPage::saveGodot() {
+  const QString text = godot_->text().trimmed();
+  std::string error;
+  if (QString::fromStdWString(p3dagent::saved_godot_path().wstring()) != text &&
+      !p3dagent::save_godot_path(std::filesystem::path(text.toStdWString()), &error)) {
+    godot_status_->setText(QString::fromStdString(error));
+    return;
+  }
+  refreshGodot();
+}
+
+void SettingsPage::refreshGodot() {
+  godot_status_->setText(tr("Looking for Godot 4…"));
+  godot_status_->setProperty("tone", "neutral");
+  // Off the UI thread: the search runs `godot --version` on each candidate.
+  QPointer<QLabel> label = godot_status_;
+  std::thread([label] {
+    const auto g = p3dagent::locate_godot();
+    const QString text = g.found() ? tr("Ready: Godot %1 (%2) — %3")
+                                         .arg(QString::fromStdString(g.version), QString::fromStdString(g.source),
+                                              QDir::toNativeSeparators(QString::fromStdWString(g.exe.wstring())))
+                                   : QString::fromStdString(p3dagent::describe_godot(g));
+    const bool ok = g.found();
+    QMetaObject::invokeMethod(qApp, [label, text, ok] {
+      if (!label) return;
+      label->setProperty("tone", ok ? "pass" : "fail");
+      label->setText(text);
+      label->style()->unpolish(label);
+      label->style()->polish(label);
+    });
+  }).detach();
+}
 
 bool SettingsPage::retextureRunning() const { return batch_ && batch_->running(); }
 

@@ -13,14 +13,18 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
+def base(version):
+    return re.sub(r"\.dryrun\.\d+$", "", version)
+
+
 def find(version):
     text = open(os.path.join(ROOT, "CHANGELOG.md"), encoding="utf-8").read()
     return re.search(rf"^## {re.escape(version)}(?=[\s—-]|$).*?$(.*?)(?=^## |\Z)", text, re.M | re.S)
 
 
 def section(version):
-    # A dry run (2.9.1-alpha.dryrun.1) has no section of its own: it uses "## Unreleased".
-    m = find(version) or (find("Unreleased") if "dryrun" in version else None)
+    # A dry run (2.10.0-alpha.dryrun.1) uses the section of the version it rehearses.
+    m = find(base(version))
     if not m:
         sys.exit(f"CHANGELOG.md has no section for {version}")
     title = m.group(0).splitlines()[0][3:].strip()
@@ -39,11 +43,8 @@ def plain(md):
 
 
 def arabic(version):
-    for name in (version, "unreleased" if "dryrun" in version else None):
-        path = os.path.join(ROOT, "docs", "release-notes", f"{name}.ar.md") if name else ""
-        if path and os.path.isfile(path):
-            return open(path, encoding="utf-8").read().strip()
-    return ""
+    path = os.path.join(ROOT, "docs", "release-notes", f"{base(version)}.ar.md")
+    return open(path, encoding="utf-8").read().strip() if os.path.isfile(path) else ""
 
 
 def main():
@@ -63,8 +64,8 @@ def main():
             f"- `3re-{version}-windows-x64-setup.exe` — installer for your user (no admin rights).",
             "- The AI models are downloaded on first use (about 5 GB), with each one's size, source and licence shown first.",
             "",
-            "> **Unsigned build.** The Windows files are not code-signed yet, so SmartScreen warns on first start.",
-            "> Check them against `SHA256SUMS.txt`, or verify the signed update manifest:",
+            "> **Unsigned build.** The Windows files are not code-signed yet, so SmartScreen warns on first start: choose",
+            "> **More info**, then **Run anyway**. Check the files against `SHA256SUMS.txt`, or verify the signed update manifest:",
             "> `minisign -Vm update-manifest.json -p 3re-update.pub` (key id 6EA665394615A750).",
         ])
     else:

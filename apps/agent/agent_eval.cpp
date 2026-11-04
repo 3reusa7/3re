@@ -77,6 +77,12 @@ std::vector<Criterion> evaluate_acceptance(const AssetSpec& spec, const json& m)
                  "delivered size differs from " + fmt(spec.scale_metres, 3) + " m by " + fmt(e, 3) + " %"});
   } else unverified("scale", "delivered size not measured");
 
+  if (str(m, "hygiene_status")) {  // G0 (docs/agent/ASSET-QUALITY.md)
+    std::string why;
+    for (const auto& r : m.value("hygiene_reasons", json::array())) why += (why.empty() ? "" : "; ") + r.get<std::string>();
+    c.push_back({"transform_hygiene", m["hygiene_status"].get<std::string>(), why.empty() ? "no mirrored or non-uniform node, winding agrees with normals" : why});
+  } else unverified("transform_hygiene", "transform hygiene not measured");
+
   if (m.contains("up_axis_ok") && m["up_axis_ok"].is_boolean())
     c.push_back({"orientation", m["up_axis_ok"].get<bool>() ? "PASS" : "REVIEW", "Y-up, standing on y = 0"});
   else unverified("orientation", "orientation not measured");
@@ -89,7 +95,7 @@ std::vector<Criterion> evaluate_acceptance(const AssetSpec& spec, const json& m)
                        std::to_string(m["triangles"].get<int64_t>())});
     else c.push_back({"godot_import", "PASS", "imported and instantiated by Godot headless"});
   } else if (godot == "FAIL") c.push_back({"godot_import", "FAIL", m.value("godot_detail", std::string("Godot import failed"))});
-  else if (spec.acceptance.require_godot_import) unverified("godot_import", "Godot import not run (Godot not available)");
+  else if (spec.acceptance.require_godot_import) unverified("godot_import", "Godot import not run: Godot 4 not found (3re Settings > Delivery check)");
   return c;
 }
 

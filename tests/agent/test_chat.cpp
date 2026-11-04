@@ -478,3 +478,35 @@ TEST_CASE("more pictures for a finished model: re-texture with them (the side fr
   CHECK(spec.value("triangle_budget", 0) == 0);  // the budget still comes from the same preset
   CHECK(spec.value("preset", std::string()) == "pc_character");
 }
+
+TEST_CASE("2.10.0: without Godot the chat does not start a run, says why and how to fix it, and starts on \"start\" once found") {
+  const auto dir = scratch("no-godot");
+  std::vector<fs::path> started;
+  bool godot_installed = false;
+  auto env = ToolEnv{dir / "conv", dir / "runs", {}, "tester", {},
+                     [&](const fs::path&, const fs::path& out, std::string&) { started.push_back(out); fs::create_directories(out); return true; },
+                     [] { return uint64_t(8000); }, [] { return 0; }};
+  env.find_godot = [&] {
+    p3dagent::GodotLocation g;
+    if (godot_installed) {
+      g.exe = "C:/Godot/Godot_v4.7-stable_win64_console.exe";
+      g.version = "4.7.stable.official";
+      g.source = "found automatically";
+    }
+    return g;
+  };
+  Tools tools(env);
+  RulesProvider rules;
+  Session s(dir / "conv", rules, tools);
+  auto out = s.user("pc prop 0.9 m", {{picture(dir / "in" / "axe_front.png"), ""}});
+  CHECK(started.empty());
+  CHECK(all_text(out).find("Godot 4 was not found") != std::string::npos);
+  CHECK(all_text(out).find("Settings > Delivery check") != std::string::npos);
+  auto ar = s.user("ابدأ");  // still missing: the same message, in Arabic
+  CHECK(started.empty());
+  CHECK(all_text(ar).find("لم أجد Godot 4") != std::string::npos);
+  godot_installed = true;
+  out = s.user("start");
+  REQUIRE(started.size() == 1);
+  CHECK(all_text(out).find("Delivery check: Godot 4.7.stable.official") != std::string::npos);
+}

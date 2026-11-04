@@ -24,12 +24,17 @@ class SettingsPage : public QWidget {
   // Re-texture all saved models (background, cancellable); also used by --retexture-all.
   void startRetextureAll();
   bool retextureRunning() const;
+  // Delivery check: where Godot 4 is (Settings path, else found automatically) and whether it answers.
+  void refreshGodot();
 
  signals:
   void advancedChanged(bool on);
 
  private:
+  void saveGodot();
   QLineEdit* projects_ = nullptr;
+  QLineEdit* godot_ = nullptr;
+  QLabel* godot_status_ = nullptr;
   QComboBox* scale_ = nullptr;
   QCheckBox *software_ = nullptr, *advanced_ = nullptr;
   QVBoxLayout* diagnostics_ = nullptr;

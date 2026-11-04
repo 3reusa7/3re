@@ -19,6 +19,9 @@ int main(int argc, char** argv) {
   QTemporaryDir settings;
   QSettings::setDefaultFormat(QSettings::IniFormat);
   QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, settings.path());
+  // The Agent page reattaches unfinished conversations from Documents\3re: tests use their own empty folder.
+  QTemporaryDir documents;
+  qputenv("THREERE_DOCUMENTS", documents.path().toUtf8());
   const QString logs = qEnvironmentVariable("THREERE_TEST_LOG_DIR");
   int failed = 0;
   for (const auto& make : threere_test::registry()) {

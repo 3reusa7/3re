@@ -10,7 +10,7 @@ import os
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-TRELLIS_REV = "a57397bd3d351599d9729fc144b3f87c3f87d65b"
+WEIGHTS_TAG = "weights-trellis2-q4-1"  # .github/workflows/build-weights.yml; byte-identical to the pins below
 TRELLIS_FILES = [  # (file, size, sha256) = models-manifest.json revision a57397bd
     ("dinov3.gguf", 172662976, "6473cf96fd275bf84f5cc0556975a2abaa10b641e4a07101dcad561df1917ef2"),
     ("ss_flow.gguf", 730496672, "a43c6393ee4a763a03e382de750d4f62752bacf969940442fd856230e62b88c2"),
@@ -65,7 +65,7 @@ catalog = {
             "id": "trellis-q4",
             "title": "TRELLIS.2 image-to-3D weights (Q4, 512)",
             "purpose": "Turn a picture into a 3D model (Image to 3D, Agent).",
-            "source": "huggingface.co/ilintar/trellis2-gguf, revision " + TRELLIS_REV[:8],
+            "source": "github.com/3reusa7/3re, release " + WEIGHTS_TAG + " (quantized from Microsoft's TRELLIS.2)",
             "licence": "MIT (TRELLIS.2 by Microsoft); dinov3.gguf: DINOv3 License (Meta)",
             "licence_urls": [
                 "https://huggingface.co/microsoft/TRELLIS.2-4B",
@@ -73,7 +73,7 @@ catalog = {
             ],
             "attribution": "Built with DINOv3",
             "files": [
-                {"url": f"https://huggingface.co/ilintar/trellis2-gguf/resolve/{TRELLIS_REV}/q4/{n}",
+                {"url": f"https://github.com/3reusa7/3re/releases/download/{WEIGHTS_TAG}/{n}",
                  "path": "models/trellis/q4/" + n, "size": s, "sha256": h}
                 for n, s, h in TRELLIS_FILES
             ],

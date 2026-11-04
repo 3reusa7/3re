@@ -279,6 +279,17 @@ QVector<int> AgentRunModel::feed(const json& j) {
     }
     it.lines.prepend(QStringLiteral("%1 tools verified (SHA-256), %2 missing or not verified").arg(ok).arg(missing));
     add(it);
+  } else if (ev == "godot") {
+    if (j.value("found", false)) {
+      it.title = QStringLiteral("Delivery check: Godot %1").arg(q(j, "version"));
+      it.detail = QStringLiteral("%1 · %2").arg(q(j, "source"), QDir::toNativeSeparators(q(j, "exe")));
+    } else {
+      it.title = QStringLiteral("Delivery check unavailable: Godot 4 not found");
+      it.detail = QStringLiteral("The asset cannot PASS. Install Godot 4 or choose its console executable in Settings > Delivery check.");
+      it.tone = "fail";
+    }
+    if (!q(j, "problem").isEmpty()) it.lines << q(j, "problem");
+    add(it);
   } else if (ev == "plan") {
     const auto p = j.value("plan", json::object());
     it.kind = AgentItem::Kind::Plan;

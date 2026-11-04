@@ -2,6 +2,8 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
+#include <windows.h>
+
 #include <chrono>
 #include <cstring>
 #include <fstream>
@@ -13,6 +15,7 @@
 #include "agent/agent_fidelity.hpp"
 #include "agent/agent_glb.hpp"
 #include "agent/agent_gltf_decimate.hpp"
+#include "agent/agent_godot.hpp"
 #include "agent/agent_plan.hpp"
 #include "agent/agent_probe.hpp"
 #include "agent/agent_recovery.hpp"
@@ -550,7 +553,7 @@ TEST_CASE("acceptance: all measured and inside the spec -> PASS") {
   const auto s = spec_from(minimal_spec());
   const json m = {{"triangles", 4990}, {"geometry_verdict", "REVIEW"}, {"texture_verdict", "PASS"}, {"khronos_errors", 0},
                   {"reload_ok", true}, {"godot_status", "PASS"}, {"godot_triangles", 4990}, {"scale_error_pct", 0.1},
-                  {"up_axis_ok", true}, {"deviation_p99_pct", 0.4}};
+                  {"up_axis_ok", true}, {"deviation_p99_pct", 0.4}, {"hygiene_status", "PASS"}};
   const auto c = evaluate_acceptance(s, m);
   CHECK(overall_status(c) == "PASS");
 }
@@ -843,7 +846,7 @@ json glb_spec(const fs::path& glb, int budget) {
 TEST_CASE("agent: GLB inside the budget is delivered at the spec's scale; no Godot -> UNVERIFIED, never PASS") {
   const auto dir = scratch("agent-glb");
   write_new_file(dir / "ball.glb", encode_glb(sphere_glb(32, 16)));  // 960 triangles, 2 units
-  const auto a = run_agent(dir, glb_spec(dir / "ball.glb", 5000));
+  const auto a = run_agent(dir, glb_spec(dir / "ball.glb", 5000), {"--godot", "none"});  // 2.10.0: Godot is otherwise found by itself
   CHECK(a.exit_code == 1);
   REQUIRE(a.report.is_object());
   CHECK(a.report["status"] == "UNVERIFIED");
@@ -1846,4 +1849,68 @@ TEST_CASE("multi-mesh topology: two separate textured parts touching at a seam a
   const auto t = topology(fmesh_from_glb(g));
   CHECK(t.overfull_edges == 0);
   CHECK(t.boundary_edges == 8);  // two open quads, 4 border edges each
+}
+
+namespace {
+// Sets an environment variable for one scope and restores it.
+struct EnvVar {
+  std::wstring name, old;
+  bool had = false;
+  EnvVar(const wchar_t* n, const std::wstring& v) : name(n) {
+    wchar_t buf[32768];
+    const DWORD k = GetEnvironmentVariableW(n, buf, 32768);
+    had = k > 0 && k < 32768;
+    if (had) old.assign(buf, k);
+    SetEnvironmentVariableW(n, v.empty() ? nullptr : v.c_str());
+  }
+  ~EnvVar() { SetEnvironmentVariableW(name.c_str(), had ? old.c_str() : nullptr); }
+};
+void touch(const fs::path& f) {
+  fs::create_directories(f.parent_path());
+  std::ofstream(f) << "x";
+}
+}  // namespace
+
+TEST_CASE("2.10.0 Godot: candidates in the usual places, console builds and the newest version first") {
+  const auto home = scratch("godot-home");
+  touch(home / "Desktop" / "Godot_v4.6.3-stable_win64_console.exe");
+  touch(home / "Desktop" / "godot" / "Godot_v4.7-stable_win64.exe");
+  touch(home / "Desktop" / "godot" / "Godot_v4.7-stable_win64_console.exe");
+  touch(home / "Downloads" / "Godot_v4.6.1-stable_win64.exe" / "Godot_v4.6.1-stable_win64_console.exe");
+  touch(home / "Downloads" / "Godot_v3.5-stable_win64.exe");
+  touch(home / "Desktop" / "notes.exe");
+  EnvVar u(L"USERPROFILE", home.wstring()), p(L"PATH", L""), pf(L"ProgramFiles", L""), pf86(L"ProgramFiles(x86)", L""), la(L"LOCALAPPDATA", L"");
+  std::vector<fs::path> searched;
+  const auto c = godot_candidates(&searched);
+  REQUIRE(c.size() == 5);
+  CHECK(c[0].filename() == "Godot_v4.7-stable_win64_console.exe");
+  CHECK(c[1].filename() == "Godot_v4.6.3-stable_win64_console.exe");
+  CHECK(c[2].filename() == "Godot_v4.6.1-stable_win64_console.exe");
+  CHECK(c[3].filename() == "Godot_v4.7-stable_win64.exe");
+  CHECK(c[4].filename() == "Godot_v3.5-stable_win64.exe");  // Godot 3 last (its --version then rules it out)
+  CHECK_FALSE(searched.empty());
+  // The GUI build maps to the console build next to it (only that one writes the check's result to stdout).
+  CHECK(godot_console_for(home / "Desktop" / "godot" / "Godot_v4.7-stable_win64.exe").filename() == "Godot_v4.7-stable_win64_console.exe");
+  CHECK(godot_console_for(home / "Downloads" / "Godot_v3.5-stable_win64.exe").filename() == "Godot_v3.5-stable_win64.exe");
+}
+
+TEST_CASE("2.10.0 Godot: a named path is used or reported, never replaced; Settings path round-trips") {
+  const auto dir = scratch("godot-named");
+  EnvVar portable(L"THREERE_PORTABLE_USERDATA", dir.wstring()), g(L"THREERE_GODOT", L"");
+  CHECK(agent_settings_file() == dir / "Settings" / "3re" / "agent-settings.json");
+  CHECK(saved_godot_path().empty());
+  REQUIRE(save_godot_path(dir / "Godot" / "godot_console.exe", nullptr));
+  CHECK(saved_godot_path() == dir / "Godot" / "godot_console.exe");
+  REQUIRE(save_godot_path({}, nullptr));
+  CHECK(saved_godot_path().empty());
+  // --godot naming a missing file: not found, with the reason (no silent fallback to another Godot).
+  const auto missing = locate_godot(dir / "nowhere" / "godot.exe");
+  CHECK_FALSE(missing.found());
+  CHECK(missing.problem.find("does not exist") != std::string::npos);
+  CHECK(describe_godot(missing).find("Settings > Delivery check") != std::string::npos);
+  // A file that is not Godot (does not answer --version with 4.x).
+  touch(dir / "fake" / "Godot_v4.7-stable_win64_console.exe");
+  const auto fake = locate_godot(dir / "fake" / "Godot_v4.7-stable_win64_console.exe");
+  CHECK_FALSE(fake.found());
+  CHECK(fake.problem.find("not a Godot 4 console executable") != std::string::npos);
 }

@@ -58,6 +58,8 @@ Monocypher 4.0.3 - Ed25519 and BLAKE2b for the signed update manifests
 trellis.cpp (TRELLIS.2 native port) - triangle BVH, QEM simplifier and geometry
   cleanup used by pixel3d-geometry-audit.exe and pixel3d-trellis-post-safe.exe
   (tools/trellis/decimate_qem_guarded.cpp is a modified copy of its CPU QEM)
+  tools/weights/convert.py and quantize_gguf.py are unchanged copies of its tools
+  (tools/weights/LICENSE-trellis.cpp)
   Licence: MIT                       LICENSES/Trellis-tri-bvh-MIT.txt
   Source:  https://github.com/pwilkin/trellis.cpp
 
@@ -111,9 +113,9 @@ ONNX Runtime 1.22.0 (CPU) - app/onnxruntime.dll, runs SAM 2.1 segmentation
   Notices:                           LICENSES/onnxruntime-ThirdPartyNotices.txt
   Source:  https://github.com/microsoft/onnxruntime/releases/tag/v1.22.0
 
-Microsoft Visual C++ runtime 14.x (msvcp140.dll, vcruntime140.dll, vcruntime140_1.dll)
-  Needed by onnxruntime.dll and the ggml libraries; deployed app-local as Microsoft
-  allows for its redistributable runtime files.
+Microsoft Visual C++ runtime (msvcp140.dll, msvcp140_1.dll, vcruntime140.dll, vcruntime140_1.dll)
+  Needed by onnxruntime.dll and the ggml libraries. Release (non-debug) DLLs from the Visual Studio
+  redist folder, deployed app-local as Microsoft allows for its redistributable runtime files.
   Terms:   https://learn.microsoft.com/cpp/windows/redistributing-visual-cpp-files
 
 QuadWild-BiMDF 0.0.2 (Smart Retopology engine: app/retopo/quadwild.exe, quad_from_patches.exe)
@@ -139,13 +141,14 @@ GPU engine libraries - ggml (ggml.dll, ggml-base.dll, ggml-cpu.dll, ggml-cuda.dl
 
 TRELLIS.2 image-to-3D weights, Q4 GGUF (dinov3, ss_flow, ss_dec, shape_flow_512,
   shape_dec, tex_flow_512, tex_dec)
-  From:    https://huggingface.co/ilintar/trellis2-gguf (revision a57397bd)
+  From:    https://github.com/3reusa7/3re/releases/tag/weights-trellis2-q4-1, quantized by 3re
+           from microsoft/TRELLIS.2-4B and microsoft/TRELLIS-image-large
   Licence: TRELLIS.2 by Microsoft: MIT, https://huggingface.co/microsoft/TRELLIS.2-4B
            dinov3.gguf: Meta's DINOv3 image encoder under the DINOv3 License,
            https://ai.meta.com/resources/models-and-libraries/dinov3-license
            Built with DINOv3.
-  Note:    the GGUF repository's own card says "see the source model" and does not
-           state a licence of its own.
+  Note:    the files are byte-identical to the ones at huggingface.co/ilintar/trellis2-gguf
+           (revision a57397bd); docs/research/own-gguf-weights.md has the proof.
 
 SAM 2.1 Hiera-Tiny, ONNX export (encoder, decoder, config)
   From:    https://huggingface.co/vietanhdev/segment-anything-2.1-onnx-models (revision 6a3ac868)

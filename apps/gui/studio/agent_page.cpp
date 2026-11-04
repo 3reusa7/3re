@@ -62,12 +62,20 @@ QString time_label(double s) {
 
 }  // namespace
 
+namespace {
+// Documents\3re (conversations, agent runs); THREERE_DOCUMENTS replaces Documents (tests: never the person's folder).
+QString documents_3re() {
+  const QString o = qEnvironmentVariable("THREERE_DOCUMENTS");
+  return (o.isEmpty() ? QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) : o) + "/3re";
+}
+}  // namespace
+
 AgentPage::AgentPage(QWidget* parent) : QWidget(parent) {
   // Milestone 4: the chat on the left, the run viewer on the right.
   auto* outer = new QHBoxLayout(this);
   outer->setContentsMargins(24, 20, 0, 0);
   outer->setSpacing(theme::space::lg);
-  const QString docs = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/3re";
+  const QString docs = documents_3re();
   chat_ = new AgentChatPanel(docs + "/conversations", docs + "/agent-runs", QDir(QCoreApplication::applicationDirPath()).filePath("3re-agent.exe"), this);
   chat_->setMinimumWidth(380);
   chat_->setMaximumWidth(520);
@@ -152,7 +160,7 @@ void AgentPage::chooseRun() {
 void AgentPage::chooseSpec() {
   const QString spec = QFileDialog::getOpenFileName(this, tr("Asset spec for 3re-agent"), QString(), tr("Asset spec (*.json)"));
   if (spec.isEmpty()) return;
-  const QString base = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/3re/agent-runs";
+  const QString base = documents_3re() + "/agent-runs";
   const QString out = QDir(base).filePath(QFileInfo(spec).completeBaseName() + "-" + QDateTime::currentDateTime().toString("yyyyMMdd-HHmmss"));
   QString error;
   if (!startRun(spec, out, &error)) {

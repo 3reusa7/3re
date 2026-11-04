@@ -293,7 +293,7 @@ endif()
 if(WIN32)
   add_library(p3d_agent_core STATIC agent/agent_spec.cpp agent/agent_plan.cpp agent/agent_recovery.cpp
     agent/agent_glb.cpp agent/agent_eval.cpp agent/agent_exec.cpp agent/agent_probe.cpp agent/agent_fidelity.cpp agent/agent_select.cpp
-    agent/agent_gltf_decimate.cpp agent/agent_decide.cpp ../tools/smartquad/tri_bvh.cpp ../third_party/meshoptimizer/simplifier.cpp)
+    agent/agent_gltf_decimate.cpp agent/agent_decide.cpp agent/agent_hygiene.cpp agent/agent_godot.cpp ../tools/smartquad/tri_bvh.cpp ../third_party/meshoptimizer/simplifier.cpp)
   target_include_directories(p3d_agent_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} PRIVATE ../tools/smartquad ../third_party/meshoptimizer)
   target_link_libraries(p3d_agent_core PUBLIC pixel3d-core PRIVATE bcrypt)
   pixel3d_warnings(p3d_agent_core)
@@ -342,4 +342,11 @@ if(WIN32)
   target_link_options(pixel3d-mesh-fidelity PRIVATE -municode)
   pixel3d_executable(pixel3d-mesh-fidelity)
   pixel3d_windows_resources(pixel3d-mesh-fidelity "3re mesh fidelity check (asset agent)")
+
+  # Asset quality G0-G4 (docs/agent/ASSET-QUALITY.md): transform hygiene, detail and part tools.
+  add_executable(pixel3d-asset-quality agent/asset_quality_main.cpp)
+  target_link_libraries(pixel3d-asset-quality PRIVATE p3d_agent_core)
+  target_link_options(pixel3d-asset-quality PRIVATE -municode)
+  pixel3d_executable(pixel3d-asset-quality)
+  pixel3d_windows_resources(pixel3d-asset-quality "3re asset quality checks (asset agent)")
 endif()

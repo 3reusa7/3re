@@ -41,7 +41,7 @@ class IdentityTests : public QObject {
     QVERIFY(p3dasset::setting_env("TEST_VALUE").isEmpty());
   }
   void version_is_2_8_0_alpha() {
-    QCOMPARE(QString::fromUtf8(pixel3d::version().data(), qsizetype(pixel3d::version().size())), QString("2.9.1-alpha"));
+    QCOMPARE(QString::fromUtf8(pixel3d::version().data(), qsizetype(pixel3d::version().size())), QString("2.10.0-alpha"));
     QCOMPARE(QString(p3dgui::identity::kProduct), QString("3re"));
   }
 };

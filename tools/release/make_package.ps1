@@ -7,12 +7,14 @@
 .PARAMETER Build     CMake build folder (default build\release).
 .PARAMETER Inputs    The unpacked build inputs zip (tools\release\build-inputs.json lists and pins every file).
 .PARAMETER QtBin     Qt's bin folder (windeployqt.exe).
+.PARAMETER MsvcDir   Visual Studio's redist folder Microsoft.VC*.CRT: only its four release DLLs are shipped, no debug DLLs.
 .PARAMETER Out       Output folder: Out\3re\ (the staged release) and Out\3re-<version>-windows-x64.zip.
 #>
 param(
   [string]$Build = 'build\release',
   [Parameter(Mandatory = $true)][string]$Inputs,
   [Parameter(Mandatory = $true)][string]$QtBin,
+  [Parameter(Mandatory = $true)][string]$MsvcDir,
   [Parameter(Mandatory = $true)][string]$Out
 )
 $ErrorActionPreference = 'Stop'
@@ -54,7 +56,14 @@ Copy-Item (Join-Path $Validator 'gltf_validator.exe') $App
   --skip-plugin-types 'networkinformation,generic' --dir $App (Join-Path $App '3re-studio.exe') | Out-Host
 if ($LASTEXITCODE -ne 0) { Fail 'windeployqt failed' }
 Copy-Item (Join-Path $TC 'onnxruntime\1.22.0\lib\onnxruntime.dll') $App
-Get-ChildItem (Join-Path $Inputs 'msvc') -File | ForEach-Object { Copy-Item $_.FullName $App }
+$Msvc = @('msvcp140.dll', 'msvcp140_1.dll', 'vcruntime140.dll', 'vcruntime140_1.dll')
+foreach ($n in $Msvc) {
+  if (-not (Test-Path (Join-Path $MsvcDir $n))) { Fail "missing $n in $MsvcDir" }
+  Copy-Item (Join-Path $MsvcDir $n) $App
+}
+# The ggml libraries are linked with toolset 14.44: an older runtime is not guaranteed to work with them.
+$crt = (Get-Item (Join-Path $App 'msvcp140.dll')).VersionInfo
+if ($crt.FileMajorPart -ne 14 -or $crt.FileMinorPart -lt 44) { Fail "Visual C++ runtime too old: $($crt.FileVersion)" }
 
 # The engine: 3re's trellis.cpp fork and the verified cleanup; its GPU libraries are downloaded on first use.
 $Runtime = Join-Path $App 'runtime'
@@ -62,7 +71,7 @@ Copy-Item (Join-Path $Inputs 'engine\trellis-cli.exe') $Runtime
 Copy-Item (Join-Path $Inputs 'engine\trellis-cli.exe') (Join-Path $Runtime 'trellis-tex-replay.exe')
 Copy-Item (Join-Path $Inputs 'engine\pixel3d-trellis-post-safe.exe') $Runtime
 foreach ($n in @('libgcc_s_seh-1.dll', 'libstdc++-6.dll', 'libwinpthread-1.dll')) { Copy-Item (Join-Path $Inputs "engine\$n") $Runtime }
-foreach ($n in @('msvcp140.dll', 'vcruntime140.dll', 'vcruntime140_1.dll')) { Copy-Item (Join-Path $Inputs "msvc\$n") $Runtime }
+foreach ($n in @('msvcp140.dll', 'vcruntime140.dll', 'vcruntime140_1.dll')) { Copy-Item (Join-Path $MsvcDir $n) $Runtime }
 
 # The weights manifest the engine checks, written from the pinned catalog (same format as the store's).
 $catalog = Get-Content -Raw (Join-Path $Repo 'apps\update\models.json') | ConvertFrom-Json
