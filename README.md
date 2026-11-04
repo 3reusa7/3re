@@ -2,11 +2,11 @@
   <img src="branding/png/3re-lockup-horizontal-dark.png" alt="3re" width="360">
 </p>
 
-<p align="center"><b>Pictures and pixel art to clean, checked 3D game assets — offline, on your own Windows PC.</b></p>
+<p align="center"><b>Turn one picture into a textured 3D model. Free, offline, on your own Windows PC.</b></p>
 
 <p align="center">
-  <a href="../../releases/latest"><img alt="Download for Windows (portable zip)" src="https://img.shields.io/badge/Download-Windows%20x64%20zip-4F6593?style=for-the-badge"></a>
-  <a href="../../releases/latest"><img alt="Download the Windows installer" src="https://img.shields.io/badge/Download-Windows%20installer-4F6593?style=for-the-badge"></a>
+  <a href="https://github.com/3reusa7/3re/releases/download/v2.10.0-alpha/3re-2.10.0-alpha-windows-x64.zip"><img alt="Download for Windows (portable zip)" src="https://img.shields.io/badge/Download-Windows%20x64%20zip-4F6593?style=for-the-badge"></a>
+  <a href="https://github.com/3reusa7/3re/releases/download/v2.10.0-alpha/3re-2.10.0-alpha-windows-x64-setup.exe"><img alt="Download the Windows installer" src="https://img.shields.io/badge/Download-Windows%20installer-4F6593?style=for-the-badge"></a>
   <br>
   <img alt="Licence: Apache-2.0" src="https://img.shields.io/badge/licence-Apache--2.0-blue">
   <img alt="Status: alpha" src="https://img.shields.io/badge/status-alpha-orange">
@@ -18,28 +18,36 @@
 > `3re.exe` ("More info" → "Run anyway"). Every release lists the SHA-256 of each file, and the update manifest
 > is signed (see [Updates](docs/UPDATES.md)), so you can check what you downloaded.
 
-3re turns **one picture** into a textured 3D model with TRELLIS.2 on an NVIDIA graphics card, or **pixel-art
-drawings** (a front view, plus side and top if you have them) into a solid, editable low-poly model. Every result is
-checked before you export it — watertight or not, matches the drawing or not, glTF valid or not — and 3re says
-PASS, REVIEW or FAIL instead of guessing.
+3re turns **one picture** into a textured 3D model with TRELLIS.2 on an NVIDIA graphics card. It is a **free alternative
+to paid image-to-3D services such as Tripo 3D**: no account, no credits, and your pictures never leave your PC. Every
+result is checked before you export it, and 3re says PASS, REVIEW or FAIL instead of guessing.
 
-| Home | Pixel Art Builder |
+3re is alpha, and it does not match a paid cloud service on every picture yet. It is free and I am hoping for help
+developing it: see [Help 3re](#help-3re). 3re is not affiliated with Tripo.
+
+## Examples
+
+Models made by 3re from one picture on a 4 GB laptop GPU: front, three-quarter, side, back and other side.
+
+![A hooded character made by 3re, seen from five sides](docs/images/example-rogue.jpg)
+
+![A sword made by 3re, seen from five sides](docs/images/example-sword.jpg)
+
+## Screenshots
+
+| Home | Image to 3D: mark the regions to keep |
 |---|---|
-| ![3re home](docs/images/home.png) | ![Pixel Art Builder with a 16×24 character drawing turned into a validated model](docs/images/pixel-art-builder.png) |
-| **Image to 3D: mark the regions to keep** | **Updates: signed, and only after you confirm** |
-| ![Image to 3D, region step, with a synthetic test picture](docs/images/image-to-3d-regions.png) | ![Settings: update channel, daily check, privacy note](docs/images/settings-updates.png) |
+| ![3re home](docs/images/home.png) | ![Image to 3D, region step, with a synthetic test picture](docs/images/image-to-3d-regions.png) |
 
 <sub>Screenshots use 3re's own synthetic test pictures (`tests/fixtures`).</sub>
 
 ## What works today
 
-Honest status of 3re 2.9 (alpha). "Tested" means on the maintainer's PC: Windows 11, RTX 3050 laptop GPU with
+Honest status of 3re 2.10 (alpha). "Tested" means on the maintainer's PC: Windows 11, RTX 3050 laptop GPU with
 4 GB, 16 GB RAM.
 
 | Feature | Status | Notes |
 |---|---|---|
-| Pixel Art Builder: front/side/top drawings → solid model, edit, export | ✅ Works | Watertight check, drawing match per view, part editing, undo |
-| Low-Poly Studio (stylised characters from a front and side drawing) | ✅ Works | Limb chains, profiles; rigging is experimental (below) |
 | Image to 3D with TRELLIS.2 (Q4, 512) | ✅ Works, tested on 4 GB | About 7 minutes per model on the tested GPU; NVIDIA + CUDA only |
 | Texture from your picture (hybrid / auto texture, several angles) | ✅ Works | Hidden sides use TRELLIS's own texture; a hidden-side gate reports doubtful backs |
 | Regions with SAM 2.1 tiny (click to select) | ✅ Works | Runs on the CPU |
@@ -48,7 +56,6 @@ Honest status of 3re 2.9 (alpha). "Tested" means on the maintainer's PC: Windows
 | Updates from GitHub Releases, signed, with roll-back | 🧪 New | Tested end to end against a local test server; no public release has used it yet |
 | Game-Ready Asset Agent and chat (Arabic and English) | 🧪 Experimental | Rules-based, offline; on our regression set 6 of 11 assets PASS (2.7.0) — [details](docs/agent/README.md) |
 | Smart Retopology (QuadWild) | 🧪 Experimental | Thin parts (blades) can fail; results are measured, never assumed |
-| Rigging | 🧪 Experimental | Low-Poly Studio models only |
 | Linux (NVIDIA CUDA) | 🗺️ Planned | Platform layer first, then CI builds |
 | macOS (Apple Silicon) | 🗺️ Planned | After Linux |
 | Animation | 🗺️ Planned | Shown as "Coming soon" in the app |
@@ -57,21 +64,20 @@ Honest status of 3re 2.9 (alpha). "Tested" means on the maintainer's PC: Windows
 
 | Tier | What you can do | Needs |
 |---|---|---|
-| Any PC | Pixel Art Builder, Low-Poly Studio, export, retopology of your own meshes | Windows 10/11 64-bit, OpenGL 3.3 (or the software 3D view) |
+| Any PC | Export and retopology of your own meshes | Windows 10/11 64-bit, OpenGL 3.3 (or the software 3D view) |
 | **Tested for AI** | Image to 3D, textures, regions, Agent | NVIDIA GPU with **4 GB** VRAM and a CUDA 12 driver, **16 GB RAM**, about 6 GB free disk for the models |
 | Bigger NVIDIA GPUs | The same, probably faster | Not measured by us yet — [send a hardware report](../../issues/new?template=hardware-report.yml) |
-| AMD / Intel GPUs, CPU only | Pixel art features only | Image to 3D needs CUDA |
+| AMD / Intel GPUs, CPU only | No Image to 3D yet | Image to 3D needs CUDA |
 
 ## Quick start
 
 1. **Download** the portable zip (unzip anywhere) or the installer (installs for your user, no admin rights) from
-   [Releases](../../releases/latest).
+   [zip](https://github.com/3reusa7/3re/releases/download/v2.10.0-alpha/3re-2.10.0-alpha-windows-x64.zip), [installer](https://github.com/3reusa7/3re/releases/download/v2.10.0-alpha/3re-2.10.0-alpha-windows-x64-setup.exe).
 2. **Start `3re.exe`.** Windows may warn because the build is not signed: "More info" → "Run anyway".
 3. **Choose the AI models.** On the first start 3re lists what it can download (about 5 GB: GPU engine libraries,
-   TRELLIS.2 weights, SAM 2.1), with each size, source and licence. Download now, later from Settings, or never —
-   Pixel Art Builder works without them.
-4. **Make a model.** *Image to 3D*: drop a picture, optionally mark the regions to keep, press Generate.
-   *Pixel Art Builder*: drop your front (and side/top) drawing. Read the checks: PASS, REVIEW or FAIL, and why.
+   TRELLIS.2 weights, SAM 2.1), with each size, source and licence. Download now or later from Settings.
+4. **Make a model.** Drop a picture, optionally mark the regions to keep, press Generate. Read the checks: PASS,
+   REVIEW or FAIL, and why.
 5. **Export** GLB, glTF or OBJ with the preset for your engine (Godot, Unity, Roblox or generic).
 
 The [user guide](docs/USER-GUIDE.md) goes through every page.
@@ -94,10 +100,10 @@ in. This is not legal advice.
 info", then "Run anyway". To be sure of what you downloaded, compare it with `SHA256SUMS.txt` in the release:
 `certutil -hashfile <file> SHA256`.
 
-**Does it work without an NVIDIA GPU?** The pixel-art features do. Image to 3D needs CUDA.
+**Does it work without an NVIDIA GPU?** Not yet: Image to 3D needs CUDA.
 
 **What do PASS / REVIEW / FAIL mean?** They are the result of measured checks (watertightness, self-intersection,
-match with your drawing or picture, glTF validity) — see [quality gates](docs/QUALITY.md). 3re reports defects it
+match with your picture, glTF validity) — see [quality gates](docs/QUALITY.md). 3re reports defects it
 cannot repair instead of hiding them.
 
 **How do updates work?** See [docs/UPDATES.md](docs/UPDATES.md): signed manifest, SHA-256 per file, install only after
