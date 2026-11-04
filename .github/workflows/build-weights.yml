@@ -9,6 +9,10 @@ on:
       draft_tag:
         description: 'Draft release tag for the files, for example weights-trellis2-q4-1 (empty: compare only)'
         required: false
+      packages:
+        description: 'Python packages for the tools'
+        required: false
+        default: 'gguf==0.17.1 numpy'
 
 permissions:
   contents: write
@@ -30,7 +34,7 @@ jobs:
           df -h / /mnt
       - name: Build and compare
         run: |
-          python -m pip install gguf==0.17.1 numpy
+          python -m pip install ${{ inputs.packages }}
           python tools/weights/build_q4.py "$HOME/w"
       - name: Report
         if: always()

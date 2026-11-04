@@ -13,6 +13,7 @@ import sys
 import urllib.request
 
 import gguf
+import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 WORK = os.path.abspath(sys.argv[1])
@@ -91,11 +92,23 @@ def compare(name):
     row["tensors"], row["reference_tensors"] = len(ta), len(tb)
     row["only_ours"], row["only_reference"] = sorted(set(ta) - set(tb))[:20], sorted(set(tb) - set(ta))[:20]
     row["type_differs"], row["data_differs"] = [], []
+    row.update(bytes_differ=0, bytes_compared=0, q4_blocks=0, q4_blocks_differ=0, q4_scale_differs=0, q4_max_step=0)
     for n in sorted(set(ta) & set(tb)):
         if ta[n].tensor_type != tb[n].tensor_type or list(ta[n].shape) != list(tb[n].shape):
             row["type_differs"].append(f"{n}: {ta[n].tensor_type.name}{list(ta[n].shape)} / {tb[n].tensor_type.name}{list(tb[n].shape)}")
         elif ta[n].data.tobytes() != tb[n].data.tobytes():
             row["data_differs"].append(n)
+            x, y = ta[n].data.reshape(-1).view("u1"), tb[n].data.reshape(-1).view("u1")
+            row["bytes_differ"] += int((x != y).sum())
+            row["bytes_compared"] += int(x.size)
+            if ta[n].tensor_type == gguf.GGMLQuantizationType.Q4_0:
+                bx, by = x.reshape(-1, 18), y.reshape(-1, 18)
+                row["q4_blocks_differ"] += int((bx != by).any(axis=1).sum())
+                row["q4_scale_differs"] += int((bx[:, :2] != by[:, :2]).any(axis=1).sum())
+                row["q4_blocks"] += int(bx.shape[0])
+                lo = np.abs((bx[:, 2:] & 15).astype(int) - (by[:, 2:] & 15).astype(int))
+                hi = np.abs((bx[:, 2:] >> 4).astype(int) - (by[:, 2:] >> 4).astype(int))
+                row["q4_max_step"] = max(row["q4_max_step"], int(lo.max()), int(hi.max()))
     row["type_differs_count"], row["data_differs_count"] = len(row["type_differs"]), len(row["data_differs"])
     row["type_differs"], row["data_differs"] = row["type_differs"][:20], row["data_differs"][:20]
     return row
@@ -116,7 +129,7 @@ def main():
         rows.append(compare(name))
         print(json.dumps({k: v for k, v in rows[-1].items() if not k.startswith("only")}), flush=True)
     report = {"gguf_python": subprocess.run([sys.executable, "-m", "pip", "show", "gguf"], capture_output=True, text=True).stdout.split("\n")[1],
-              "sources": pins, "files": rows, "all_identical": all(r["identical"] for r in rows)}
+              "numpy": np.__version__, "sources": pins, "files": rows, "all_identical": all(r["identical"] for r in rows)}
     with open(os.path.join(WORK, "report.json"), "w", encoding="utf-8") as f:
         json.dump(report, f, indent=1)
     print("ALL IDENTICAL" if report["all_identical"] else "NOT ALL IDENTICAL: read report.json", flush=True)
