@@ -12,7 +12,7 @@ The one active release is `dist\3re\` (start `3re.exe`), updated by `tools\packa
 - **Clear message when Godot is missing**: the chat does not start a run that cannot PASS; it says why and how to fix
   it (Arabic or English) and starts on "start" once Godot is there. The agent run shows "Delivery check: Godot …" or
   "Delivery check unavailable" in its pre-flight (run viewer), with the reason.
-- **Release self-test**: `delivery_verification` fails the release when Godot 4 is not available; `--deep` imports a
+- **Release self-test**: `delivery_verification` warns when Godot 4 is not available and fails only `--deep`, which imports a
   one-triangle GLB headless in Godot.
 - **No mirrored or negative scale in any delivery (G0)**: every delivered GLB is audited — mirrored (negative
   determinant), non-uniform or sheared node transforms, non-rigid part pivots, winding against normals, tangents —

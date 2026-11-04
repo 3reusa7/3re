@@ -97,7 +97,7 @@ QList<SelfTestItem> run_self_test(const QString& appDir, bool deep) {
   {
     const auto g = p3dagent::locate_godot();
     if (!g.found()) {
-      add("delivery_verification", false, QString::fromStdString(p3dagent::describe_godot(g)));
+      add("delivery_verification", false, QString::fromStdString(p3dagent::describe_godot(g)), deep);  // users may not have Godot: only the deep release check needs it
     } else if (deep) {
       const auto work = std::filesystem::temp_directory_path() / ("3re-self-test-godot-" + std::to_string(QCoreApplication::applicationPid()));
       const auto smoke = p3dagent::godot_smoke_test(g.exe, work);
