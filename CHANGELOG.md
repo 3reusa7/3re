@@ -32,6 +32,7 @@ First public release: open source under Apache-2.0.
   or the GPU engine libraries. 3re lists each one's size, source and licence and asks before downloading; every file
   is pinned and checked by SHA-256; interrupted downloads resume. Pixel Art Builder needs none of them.
 - `3re.exe --self-test`: models that are not downloaded yet are a warning, a damaged one fails `--deep`.
+- README rewritten in plain language for visitors (English and Arabic), with a clear "Help me build 3re" section; full status and roadmap moved to `docs/STATUS.md`.
 - Apache-2.0 licence, NOTICE, rewritten third-party notices; README in English and Arabic; CI on every pull request
   (Windows build and tests, lint, licence and secret scans) and a release workflow with checksums and a signed manifest.
 
