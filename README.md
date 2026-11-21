@@ -1,135 +1,169 @@
 <p align="center">
-  <img src="branding/png/3re-lockup-horizontal-dark.png" alt="3re" width="360">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="branding/png/3re-lockup-horizontal-dark.png">
+    <img src="branding/png/3re-lockup-horizontal-light.png" alt="3re" width="220">
+  </picture>
 </p>
 
-<p align="center"><b>Turn one picture into a textured 3D model. Free, offline, on your own Windows PC.</b></p>
+<p align="center"><b>3re turns one picture into a 3D model for your games. It is free and open source, and it runs on your own PC.</b></p>
+
+<p align="center"><b>English</b> · <a href="README.ar.md">العربية</a></p>
+
+<!-- download:start -->
+<p align="center">
+  <img alt="Windows: first release coming soon" src="https://img.shields.io/badge/Windows-first%20release%20coming%20soon-4F6593?style=for-the-badge">
+</p>
+<!-- download:end -->
 
 <p align="center">
-  <a href="https://github.com/3reusa7/3re/releases/download/v2.10.0-alpha/3re-2.10.0-alpha-windows-x64.zip"><img alt="Download for Windows (portable zip)" src="https://img.shields.io/badge/Download-Windows%20x64%20zip-4F6593?style=for-the-badge"></a>
-  <a href="https://github.com/3reusa7/3re/releases/download/v2.10.0-alpha/3re-2.10.0-alpha-windows-x64-setup.exe"><img alt="Download the Windows installer" src="https://img.shields.io/badge/Download-Windows%20installer-4F6593?style=for-the-badge"></a>
-  <br>
-  <img alt="Licence: Apache-2.0" src="https://img.shields.io/badge/licence-Apache--2.0-blue">
-  <img alt="Status: alpha" src="https://img.shields.io/badge/status-alpha-orange">
-  <img alt="Platform: Windows 10/11 x64" src="https://img.shields.io/badge/platform-Windows%2010%2F11%20x64-lightgrey">
-  <a href="README.ar.md"><img alt="بالعربية" src="https://img.shields.io/badge/README-%D8%A8%D8%A7%D9%84%D8%B9%D8%B1%D8%A8%D9%8A%D8%A9-green"></a>
+  <img alt="Linux: coming soon" src="https://img.shields.io/badge/Linux-coming%20soon-lightgrey?style=for-the-badge">
+  <img alt="macOS: coming soon" src="https://img.shields.io/badge/macOS-coming%20soon-lightgrey?style=for-the-badge">
 </p>
 
-> **The Windows builds are not code-signed yet.** Windows SmartScreen will warn the first time you start
-> `3re.exe` ("More info" → "Run anyway"). Every release lists the SHA-256 of each file, and the update manifest
-> is signed (see [Updates](docs/UPDATES.md)), so you can check what you downloaded.
+<p align="center">This is an early (alpha) version. The Windows build is not code-signed yet, so Windows may warn you: <a href="#faq-unsigned">what to do</a>.</p>
 
-3re turns **one picture** into a textured 3D model with TRELLIS.2 on an NVIDIA graphics card. It is a **free alternative
-to paid image-to-3D services such as Tripo 3D**: no account, no credits, and your pictures never leave your PC. Every
-result is checked before you export it, and 3re says PASS, REVIEW or FAIL instead of guessing.
+<p align="center"><a href="#start">Get started</a> · <a href="#help"><b>Help me build 3re</b></a> · <a href="#faq">FAQ</a></p>
 
-3re is alpha, and it does not match a paid cloud service on every picture yet. It is free and I am hoping for help
-developing it: see [Help 3re](#help-3re). 3re is not affiliated with Tripo.
+<a id="what"></a>
+
+## What is 3re?
+
+3re turns one picture into a textured 3D model for games. It is free, it runs on your own PC, and it needs an NVIDIA
+graphics card (GPU) with 4 GB of memory. There is no account and there are no credits, your pictures never leave your
+PC, and after a one-time download of the AI models it works offline.
+
+<a id="examples"></a>
 
 ## Examples
 
-Models made by 3re from one picture on a 4 GB laptop GPU: front, three-quarter, side, back and other side.
+Models made by 3re from one picture, on a laptop graphics card with 4 GB of memory.
 
-![A hooded character made by 3re, seen from five sides](docs/images/example-rogue.jpg)
+![A hooded character made by 3re, seen from four sides](docs/images/example-rogue.jpg)
 
 ![A sword made by 3re, seen from five sides](docs/images/example-sword.jpg)
 
-## Screenshots
-
-| Home | Image to 3D: mark the regions to keep |
+| Home | Image to 3D: mark the parts to keep |
 |---|---|
-| ![3re home](docs/images/home.png) | ![Image to 3D, region step, with a synthetic test picture](docs/images/image-to-3d-regions.png) |
+| ![The 3re home page](docs/images/home.png) | ![Image to 3D, marking parts of a synthetic test picture](docs/images/image-to-3d-regions.png) |
 
-<sub>Screenshots use 3re's own synthetic test pictures (`tests/fixtures`).</sub>
+<sub>These screenshots use 3re's own synthetic test pictures (`tests/fixtures`).</sub>
+
+<a id="start"></a>
+
+## Get started
+
+1. **Download 3re for Windows** with the button at the top of this page. You can use the portable zip (unzip it
+   anywhere) or the installer (it installs for your user, no admin rights needed).
+2. **Start `3re.exe`.** Windows may warn you the first time: [what to do](#faq-unsigned).
+3. **Download the AI models.** 3re lists them with their size, source and licence (about 5 GB in total). You can
+   download them now or later from Settings.
+4. **Make your model.** Drop a picture and press Generate. Read the result: PASS, REVIEW or FAIL, and why. Then export
+   GLB, glTF or OBJ for Godot, Unity, Roblox or any other tool.
+
+The [user guide](docs/USER-GUIDE.md) explains every page.
+
+<a id="help"></a>
+
+## Help me build 3re
+
+I am building 3re on my own. It is free and open source, for everyone. It works, but it needs polishing, and I would
+love your help. You do not need to be an expert, and small help counts.
+
+- **C++ and Qt developers:** the app itself, for example the [interface](https://github.com/3reusa7/3re/issues?q=is%3Aissue%20is%3Aopen%20label%3Aui)
+  and [updates](https://github.com/3reusa7/3re/issues?q=is%3Aissue%20is%3Aopen%20label%3Aupdates).
+- **3D and graphics people:** better test pictures and ways to measure quality:
+  [evaluation issues](https://github.com/3reusa7/3re/issues?q=is%3Aissue%20is%3Aopen%20label%3Aevaluation).
+- **AI model people:** a better way to use the models, tested with a short written study:
+  [propose a change](https://github.com/3reusa7/3re/issues/new?template=feature-request.yml).
+- **Testers with other graphics cards:** every card except the RTX 3050 4 GB is untested:
+  [send a hardware report](https://github.com/3reusa7/3re/issues/new?template=hardware-report.yml).
+- **Translators:** make 3re speak your language:
+  [translation issues](https://github.com/3reusa7/3re/issues?q=is%3Aissue%20is%3Aopen%20label%3Atranslation).
+- **Docs and design:** make 3re easier to understand:
+  [documentation issues](https://github.com/3reusa7/3re/issues?q=is%3Aissue%20is%3Aopen%20label%3Adocumentation).
+
+**Your first contribution in 3 steps:**
+
+1. Pick a [good first issue](https://github.com/3reusa7/3re/issues?q=is%3Aissue%20is%3Aopen%20label%3A%22good%20first%20issue%22)
+   and comment on it, so that two people do not do the same work.
+2. Read [CONTRIBUTING.md](CONTRIBUTING.md), then make your change on a new branch.
+3. Open a pull request, with your commits signed off (`git commit -s`). This is the
+   [Developer Certificate of Origin](https://developercertificate.org/).
+
+You can also report a [bug](https://github.com/3reusa7/3re/issues/new?template=bug-report.yml). To build 3re from
+source, read [docs/BUILDING.md](docs/BUILDING.md). To see how it fits together, read
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). For security problems, read [SECURITY.md](SECURITY.md).
+
+<a id="status"></a>
 
 ## What works today
 
-Honest status of 3re 2.10 (alpha). "Tested" means on the maintainer's PC: Windows 11, RTX 3050 laptop GPU with
-4 GB, 16 GB RAM.
+3re is alpha. It is a free alternative to paid image-to-3D services such as Tripo 3D, but it does not match them on
+every picture yet. 3re is not affiliated with Tripo. "Tested" means tested on my PC: Windows 11, a laptop RTX 3050
+graphics card with 4 GB, and 16 GB of memory (RAM).
 
-| Feature | Status | Notes |
-|---|---|---|
-| Image to 3D with TRELLIS.2 (Q4, 512) | ✅ Works, tested on 4 GB | About 7 minutes per model on the tested GPU; NVIDIA + CUDA only |
-| Texture from your picture (hybrid / auto texture, several angles) | ✅ Works | Hidden sides use TRELLIS's own texture; a hidden-side gate reports doubtful backs |
-| Regions with SAM 2.1 tiny (click to select) | ✅ Works | Runs on the CPU |
-| Export GLB / glTF / OBJ, presets for Godot, Unity, Roblox | ✅ Works | Checked by the Khronos glTF-Validator |
-| Command line (`3re-cli`) and MCP server (`3re-mcp`) | ✅ Works | Same engine as the app |
-| Updates from GitHub Releases, signed, with roll-back | 🧪 New | Tested end to end against a local test server; no public release has used it yet |
-| Game-Ready Asset Agent and chat (Arabic and English) | 🧪 Experimental | Rules-based, offline; on our regression set 6 of 11 assets PASS (2.7.0) — [details](docs/agent/README.md) |
-| Smart Retopology (QuadWild) | 🧪 Experimental | Thin parts (blades) can fail; results are measured, never assumed |
-| Linux (NVIDIA CUDA) | 🗺️ Planned | Platform layer first, then CI builds |
-| macOS (Apple Silicon) | 🗺️ Planned | After Linux |
-| Animation | 🗺️ Planned | Shown as "Coming soon" in the app |
+| Feature | Status |
+|---|---|
+| One picture to 3D with TRELLIS.2 (NVIDIA and CUDA only; about 7 minutes per model on the tested card) | ✅ Works |
+| Texture from your picture, from one or several angles | ✅ Works |
+| Click to select parts of the picture, with SAM 2.1 | ✅ Works |
+| Export GLB, glTF or OBJ, with presets for Godot, Unity and Roblox | ✅ Works |
+| Command line (`3re-cli`) and MCP server (`3re-mcp`) | ✅ Works |
+| Signed updates that can go back to the previous version (tested on a local test server; no public release has used them yet) | 🧪 New |
+| Asset Agent and chat, in Arabic and English (offline and rules-based; 6 of 11 test assets PASS) | 🧪 Experimental |
+| Smart Retopology with QuadWild (thin parts such as blades can fail) | 🧪 Experimental |
+| Linux (NVIDIA CUDA), macOS (Apple Silicon), animation | 🗺️ Planned |
+
+The [full status and roadmap](docs/STATUS.md) has every detail.
+
+<a id="hardware"></a>
 
 ## Hardware
 
-| Tier | What you can do | Needs |
-|---|---|---|
-| Any PC | Export and retopology of your own meshes | Windows 10/11 64-bit, OpenGL 3.3 (or the software 3D view) |
-| **Tested for AI** | Image to 3D, textures, regions, Agent | NVIDIA GPU with **4 GB** VRAM and a CUDA 12 driver, **16 GB RAM**, about 6 GB free disk for the models |
-| Bigger NVIDIA GPUs | The same, probably faster | Not measured by us yet — [send a hardware report](../../issues/new?template=hardware-report.yml) |
-| AMD / Intel GPUs, CPU only | No Image to 3D yet | Image to 3D needs CUDA |
+| Your PC | What you can do |
+|---|---|
+| Any PC with Windows 10 or 11 (64-bit) | Export and retopology of your own 3D models |
+| NVIDIA card with 4 GB of memory, CUDA 12 driver, 16 GB of RAM, about 6 GB of free disk | Everything, including one picture to 3D. This is the tested setup. |
+| Bigger NVIDIA cards | The same, probably faster. Not measured yet: [send a hardware report](https://github.com/3reusa7/3re/issues/new?template=hardware-report.yml). |
+| AMD or Intel cards, or no graphics card | No picture to 3D yet, because it needs CUDA |
 
-## Quick start
-
-1. **Download** the portable zip (unzip anywhere) or the installer (installs for your user, no admin rights) from
-   [zip](https://github.com/3reusa7/3re/releases/download/v2.10.0-alpha/3re-2.10.0-alpha-windows-x64.zip), [installer](https://github.com/3reusa7/3re/releases/download/v2.10.0-alpha/3re-2.10.0-alpha-windows-x64-setup.exe).
-2. **Start `3re.exe`.** Windows may warn because the build is not signed: "More info" → "Run anyway".
-3. **Choose the AI models.** On the first start 3re lists what it can download (about 5 GB: GPU engine libraries,
-   TRELLIS.2 weights, SAM 2.1), with each size, source and licence. Download now or later from Settings.
-4. **Make a model.** Drop a picture, optionally mark the regions to keep, press Generate. Read the checks: PASS,
-   REVIEW or FAIL, and why.
-5. **Export** GLB, glTF or OBJ with the preset for your engine (Godot, Unity, Roblox or generic).
-
-The [user guide](docs/USER-GUIDE.md) goes through every page.
+<a id="faq"></a>
 
 ## FAQ
 
+<a id="faq-unsigned"></a>
+
+**Why does Windows warn me about 3re?** The Windows builds are not code-signed yet, because signing needs a paid
+certificate. Windows SmartScreen warns the first time you start `3re.exe`. Choose "More info", then "Run anyway". If
+Windows is in another language, the buttons use that language. To be sure of what you downloaded, compare it with
+`SHA256SUMS.txt` in the release: `certutil -hashfile <file> SHA256`. The update manifest is signed too
+([how updates work](docs/UPDATES.md)).
+
 **Does 3re send my pictures anywhere?** No. Everything runs on your PC. The only network requests are the model
-downloads you agree to and, if you leave it on, a daily check of the GitHub releases list (Settings → Updates); it
-sends no account, identifier or usage data.
+downloads you agree to and, if you leave it on, a daily check of the GitHub releases list (Settings → Updates). That
+check sends no account, identifier or usage data.
 
-**Why is the download small but the models big?** The AI weights are large, so they are not in the package: 3re
-downloads them on first use, after you agree, and checks every file's SHA-256 before using it.
+**Why is the download small but the models big?** The AI models are large, so they are not in the package. 3re
+downloads them on first use, after you agree, and checks the SHA-256 of every file before using it.
 
-**Can I use 3re commercially?** 3re's code is Apache-2.0. The models have their own terms: TRELLIS.2 is MIT, its
-DINOv3 image encoder is under Meta's DINOv3 License, SAM 2.1 is Apache-2.0
-([third-party notices](THIRD-PARTY-NOTICES.txt)). You are responsible for having the rights to the pictures you put
-in. This is not legal advice.
+**Can I use 3re commercially?** 3re's code is Apache-2.0. The models have their own terms: TRELLIS.2 is MIT, its DINOv3
+image encoder is under Meta's DINOv3 License, and SAM 2.1 is Apache-2.0
+([third-party notices](THIRD-PARTY-NOTICES.txt)). You are responsible for having the rights to the pictures you use.
+This is not legal advice.
 
-**Why does Windows warn about 3re?** The builds are not code-signed, which needs a paid certificate. Choose "More
-info", then "Run anyway". To be sure of what you downloaded, compare it with `SHA256SUMS.txt` in the release:
-`certutil -hashfile <file> SHA256`.
+**Does it work without an NVIDIA graphics card?** Not yet. One picture to 3D needs CUDA.
 
-**Does it work without an NVIDIA GPU?** Not yet: Image to 3D needs CUDA.
-
-**What do PASS / REVIEW / FAIL mean?** They are the result of measured checks (watertightness, self-intersection,
-match with your picture, glTF validity) — see [quality gates](docs/QUALITY.md). 3re reports defects it
+**What do PASS, REVIEW and FAIL mean?** They are the results of measured checks: is the model closed, does it cut into
+itself, does it match your picture, is the file valid? See [quality gates](docs/QUALITY.md). 3re reports defects it
 cannot repair instead of hiding them.
 
-**How do updates work?** See [docs/UPDATES.md](docs/UPDATES.md): signed manifest, SHA-256 per file, install only after
-you confirm, automatic roll-back if the new version fails its self-test, stable and alpha channels.
+**How do updates work?** 3re installs an update only after you confirm. The update is signed, every file has a SHA-256,
+and 3re goes back to the previous version by itself if the new one fails its self-test. There are stable and alpha
+channels. Read [docs/UPDATES.md](docs/UPDATES.md).
 
-## Roadmap
-
-- **Now:** the 2.10 and 2.11 releases (asset quality: transform hygiene, region refinement, part separation).
-- **Next:** a platform layer and the Linux (CUDA) build; CI-built GPU engine; a decision on code signing.
-- **Later:** macOS on Apple Silicon (experimental), animation.
-
-The live plan is the project board; ideas and questions go to Discussions.
-
-## Help 3re
-
-- Try it on your hardware and [send a hardware report](../../issues/new?template=hardware-report.yml) — other GPUs are
-  the biggest unknown.
-- Pick a [good first issue](docs/good-first-issues.md), or report a [bug](../../issues/new?template=bug-report.yml).
-- Improve the docs or the Arabic translation.
-- Read [CONTRIBUTING.md](CONTRIBUTING.md) first: contributions are signed off under the
-  [Developer Certificate of Origin](https://developercertificate.org/).
-
-Build from source: [docs/BUILDING.md](docs/BUILDING.md). How it fits together: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
-Security issues: [SECURITY.md](SECURITY.md).
+<a id="licence"></a>
 
 ## Licence
 
-Apache-2.0 ([LICENSE](LICENSE), [NOTICE](NOTICE)). Third-party components and the models 3re downloads are listed
-with their licences in [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt). Built with DINOv3.
+Apache-2.0 ([LICENSE](LICENSE), [NOTICE](NOTICE)). Third-party components and the models 3re downloads are listed with
+their licences in [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt). Built with DINOv3.
