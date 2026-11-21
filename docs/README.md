@@ -1,6 +1,6 @@
-# Pixel3D
+# 3re
 
-Pixel3D turns your own pixel-art drawings of an object — Front, Side and Top, optionally Back, Right and Bottom — into a validated, watertight, low-poly 3D model with the exact pixel colours as texture, and exports it as GLB, glTF or OBJ for game engines (presets for Godot, Unity and Roblox).
+3re turns your own pixel-art drawings of an object — Front, Side and Top, optionally Back, Right and Bottom — into a validated, watertight, low-poly 3D model with the exact pixel colours as texture, and exports it as GLB, glTF or OBJ for game engines (presets for Godot, Unity and Roblox).
 
 It never invents geometry or artwork silently: anything the drawings do not determine is reported, and the model is only called **PASS** when every check passes.
 
@@ -10,7 +10,7 @@ It never invents geometry or artwork silently: anything the drawings do not dete
 |---|---|
 | `Pixel3D.exe` | The desktop application. |
 | `pixel3d-cli.exe` | Command line (batch conversion, scripts). See `README-CLI.txt`. |
-| `Pixel3D-mcp.exe` | MCP server so AI agents can use Pixel3D. See `README-MCP.md` and `skills/`. |
+| `Pixel3D-mcp.exe` | MCP server so AI agents can use 3re. See `README-MCP.md` and `skills/`. |
 | `pixel3d-glbcheck.exe` | Independent check of an exported `.glb` file. |
 | `LICENSES\`, `THIRD-PARTY-NOTICES.txt` | Licences of the included components. |
 
@@ -37,7 +37,7 @@ Top (or Side) never just fails: the Views panel, the hint and Reconstruct offer 
    - **Front**: seen from the front.
    - **Side**: seen from the **left** — the object's front points to the right of the image.
    - **Top**: seen from above — the object's front edge at the **bottom** of the image.
-2. Press **Reconstruct** (F5). Pixel3D builds the model, checks it against every drawing and opens the workspace.
+2. Press **Reconstruct** (F5). 3re builds the model, checks it against every drawing and opens the workspace.
 3. The **status card** (right) says:
    - **PASS** — verified: silhouettes match every drawing and the 90°/180°/270° rotations, the model has real depth, is watertight, and the GLB reloads identically.
    - **NEEDS REVIEW** — the drawings do not determine something, for example *"Parts don't match between views"* (three legs drawn as 3 × 2 possible positions) or *"Hole or painted detail?"*. The undecided areas are amber in the model and on the drawings. Press **Review issues** (or click an amber area): the camera frames it and the right tool opens — choose which parts are real, or say how deep a hole goes. Decide only what you know, or add a Back, Right or Bottom view.
@@ -67,7 +67,7 @@ The **Part** menu and the Inspector's part page also rename, duplicate, transfor
 
 Every edit is one step in **History** (double-click a step to return to it). The **live checks** beside it update after every edit: how many pixels of each drawing now differ, whether the model is closed and manifold, estimated and undecided volume, texture coverage, mask problems. An edit that makes the model stop matching a drawing is reported at once, and the model can then not be PASS until you undo it or update the drawing.
 
-View options (View menu and the buttons over the 3D view): Orthographic (O), Textured (T), Wireframe (W), Pixel Preview (K), Normals (N), Grid (G), Snap to whole pixels (S), Issues and conflicts (C — undecided parts amber, and in views 1–6 the pixels that differ from the drawing: red only in the model, blue only drawn), Estimated geometry (E — parts and surfaces no drawing shows, cyan), and Camera ▸ Mouse Controls (Pixel3D, Blender or Maya style).
+View options (View menu and the buttons over the 3D view): Orthographic (O), Textured (T), Wireframe (W), Pixel Preview (K), Normals (N), Grid (G), Snap to whole pixels (S), Issues and conflicts (C — undecided parts amber, and in views 1–6 the pixels that differ from the drawing: red only in the model, blue only drawn), Estimated geometry (E — parts and surfaces no drawing shows, cyan), and Camera ▸ Mouse Controls (3re, Blender or Maya style).
 
 ## Styles
 
@@ -86,7 +86,7 @@ Styles never change your silhouettes: corners are rounded only as far as every d
 
 **Low-Poly Studio** (the default project type) builds a game-ready low-poly character instead of the
 pixel-exact model: drop the **Front** drawing and, if you have it, the **Side** (no Top needed). Press
-**Build character** on the start screen: Pixel3D suggests typed parts (head, body, arms, legs, horns,
+**Build character** on the start screen: 3re suggests typed parts (head, body, arms, legs, horns,
 accessories) and shows the proposal before anything changes. On the Inspector's *Low-Poly Studio* page you
 change any part's type, set the **triangle budget** (default 1000, a hard cap — nothing is decimated),
 joint loops, look (cel + outline, cel, outline, flat) and body plan, then **Build**. The character has a
@@ -104,11 +104,11 @@ a character that fails a check is never exported. Command line: `pixel3d-cli low
 
 ## Aseprite workflow
 
-Export your views from Aseprite as PNG (`front.png`, `side.png`, `top.png`, optional `back.png`, `right.png`, `bottom.png`) and drop them anywhere on the window — names decide the view; for other names Pixel3D asks once and remembers. Pixels and palette are used exactly as exported. When you re-export a drawing, Pixel3D notices and offers **Reload** in the status bar (File ▸ Reload Drawings from Disk, Ctrl+Shift+R; or tick *Reload Changed Drawings Automatically*): your edits, part masks and depth decisions are kept.
+Export your views from Aseprite as PNG (`front.png`, `side.png`, `top.png`, optional `back.png`, `right.png`, `bottom.png`) and drop them anywhere on the window — names decide the view; for other names 3re asks once and remembers. Pixels and palette are used exactly as exported. When you re-export a drawing, 3re notices and offers **Reload** in the status bar (File ▸ Reload Drawings from Disk, Ctrl+Shift+R; or tick *Reload Changed Drawings Automatically*): your edits, part masks and depth decisions are kept.
 
 ## Autosave and recovery
 
-While you work, Pixel3D autosaves to `%LOCALAPPDATA%\Pixel3D\Pixel3D\autosave`. If it ever closes unexpectedly, the next start offers to recover the work. A normal exit removes the autosave.
+While you work, 3re autosaves to `%LOCALAPPDATA%\Pixel3D\Pixel3D\autosave`. If it ever closes unexpectedly, the next start offers to recover the work. A normal exit removes the autosave.
 
 ## Export
 
@@ -125,12 +125,12 @@ Every setting can be changed: format (**GLB** one file, **glTF** `.gltf` + `.bin
 
 The size always comes from the project: by default 32 drawing pixels = 1 m (**Model ▸ Project Settings**). Origin: bottom centre of the model; +Y up. glTF and GLB sample the texture NEAREST, so pixels stay crisp. **OBJ cannot store that**: in your engine set the texture's filter to *Point* / *Nearest* (Roblox: import the `.obj` with its `.png` through the 3D Importer; Blender: Image Texture ▸ *Closest*).
 
-Every exported file is read back by an independent reader and re-rendered before Pixel3D reports it as written. A model that is not PASS is exported only after you confirm.
+Every exported file is read back by an independent reader and re-rendered before 3re reports it as written. A model that is not PASS is exported only after you confirm.
 
-## If Pixel3D closes unexpectedly
+## If 3re closes unexpectedly
 
 A crash report (`crash-<time>.txt`) is written to `%LOCALAPPDATA%\Pixel3D\crashes`; the next start mentions it and offers your autosaved work.
 
 ## Licences
 
-Pixel3D includes third-party components; `THIRD-PARTY-NOTICES.txt` lists them and `LICENSES\` holds their licence texts. Qt is linked dynamically (the `Qt6*.dll` files) under the LGPL-3.0 and can be replaced.
+3re includes third-party components; `THIRD-PARTY-NOTICES.txt` lists them and `LICENSES\` holds their licence texts. Qt is linked dynamically (the `Qt6*.dll` files) under the LGPL-3.0 and can be replaced.
